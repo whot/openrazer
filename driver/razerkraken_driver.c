@@ -11,10 +11,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  *
- * Should you need to contact me, the author, you can do by
- * e-mail - mail your message to Terry Cain <terrys-home.co.uk>
+ * Should you need to contact me, the author, you can do so by
+ * e-mail - mail your message to Terry Cain <terry@terrys-home.co.uk>
  */
 
 
@@ -611,20 +611,20 @@ void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interface *in
     dev->usb_pid = usb_dev->descriptor.idProduct;
     
     switch(dev->usb_pid) {
-			case USB_DEVICE_ID_RAZER_KRAKEN_V2:
-				dev->led_mode_address = KYLIE_SET_LED_ADDRESS;
-				dev->breathing_address[0] = KYLIE_BREATHING1_ADDRESS_START;
-				dev->breathing_address[1] = KYLIE_BREATHING2_ADDRESS_START;
-				dev->breathing_address[2] = KYLIE_BREATHING3_ADDRESS_START;
-				break;
-			case USB_DEVICE_ID_RAZER_KRAKEN:
-				dev->led_mode_address = RAINIE_SET_LED_ADDRESS;
-				dev->breathing_address[0] = RAINIE_BREATHING1_ADDRESS_START;
-				
-				// Get a "random" integer
-				get_random_bytes(&rand_serial, sizeof(unsigned int));
-				sprintf(&dev->serial[0], "HN%015u", rand_serial);
-				break;
+		case USB_DEVICE_ID_RAZER_KRAKEN_V2:
+			dev->led_mode_address = KYLIE_SET_LED_ADDRESS;
+			dev->breathing_address[0] = KYLIE_BREATHING1_ADDRESS_START;
+			dev->breathing_address[1] = KYLIE_BREATHING2_ADDRESS_START;
+			dev->breathing_address[2] = KYLIE_BREATHING3_ADDRESS_START;
+			break;
+		case USB_DEVICE_ID_RAZER_KRAKEN:
+			dev->led_mode_address = RAINIE_SET_LED_ADDRESS;
+			dev->breathing_address[0] = RAINIE_BREATHING1_ADDRESS_START;
+			
+			// Get a "random" integer
+			get_random_bytes(&rand_serial, sizeof(unsigned int));
+			sprintf(&dev->serial[0], "HN%015u", rand_serial);
+			break;
 	}
 }
 
