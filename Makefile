@@ -107,6 +107,10 @@ python_library_uninstall:
 	@echo "====================================================="
 	@make --no-print-directory -C pylib uninstall
 
+python_library_docs:
+	@echo -e "\n::\033[34m Creating Python Library docs\033[0m"
+	@echo "====================================================="
+	@make --no-print-directory -C pylib docs
 
 # Clean target
 clean: driver_clean
