@@ -8,6 +8,7 @@ from razer_daemon.dbus_services.dbus_methods.deathadder_chroma import get_logo_b
 from razer_daemon.dbus_services.dbus_methods.chroma_keyboard import get_brightness as _get_backlight_brightness, set_brightness as _set_backlight_brightness
 from razer_daemon.misc.key_event_management import NagaHexV2KeyManager as _NagaHexV2KeyManager
 
+
 class RazerMambaChromaWireless(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Mamba Chroma (Wireless)
@@ -19,7 +20,7 @@ class RazerMambaChromaWireless(__RazerDeviceBrightnessSuspend):
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness', 'get_battery', 'is_charging', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
-               'set_charge_effect', 'set_charge_colour', 'set_idle_time', 'set_low_battery_threshold', 'get_dpi_xy', 'set_dpi_xy']
+               'set_charge_effect', 'set_charge_colour', 'set_idle_time', 'set_low_battery_threshold', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
 
     RAZER_URLS = {
         "store": "http://www.razerzone.com/gb-en/store/razer-mamba",
@@ -53,7 +54,7 @@ class RazerMambaChromaWired(__RazerDeviceBrightnessSuspend):
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
-               'get_dpi_xy', 'set_dpi_xy']
+               'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
 
     RAZER_URLS = {
         "store": "http://www.razerzone.com/gb-en/store/razer-mamba",
@@ -147,6 +148,56 @@ class RazerImperiator(__RazerDevice):
         self.logger.debug("Imperiator doesnt have suspend/resume")
 
 
+class RazerOuroboros(__RazerDevice):
+    """
+    Class for the Razer Imperiator 2012
+    """
+
+    USB_VID = 0x1532
+    USB_PID = 0x0032
+    HAS_MATRIX = False
+    MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_dpi_xy', 'set_dpi_xy',
+               'get_poll_rate', 'set_poll_rate', 'set_scroll_active', 'get_scroll_active', 'get_scroll_brightness', 'set_scroll_brightness',
+               'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold']
+
+    RAZER_URLS = {
+        "store": None,
+        "top_img": None,
+        "side_img": None,
+        "perspective_img": None
+    }
+
+    def __init__(self, *args, **kwargs):
+        super(RazerOuroboros, self).__init__(*args, **kwargs)
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['brightness'] = _da_get_scroll_brightness(self)
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_scroll_brightness(self, 0)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+
+        Get the last known brightness and then set the brightness
+        """
+        scroll_brightness = self.suspend_args.get('brightness', 100)[0]
+
+        self.disable_notify = True
+        _da_set_scroll_brightness(self, scroll_brightness)
+        self.disable_notify = False
+
+
 class RazerOrochiWired(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Mamba Chroma (Wireless)
@@ -234,9 +285,9 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
 
     USB_VID = 0x1532
     USB_PID = 0x0050
-    HAS_MATRIX = False
+    HAS_MATRIX = True
     DEDICATED_MACRO_KEYS = True
-    MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
+    MATRIX_DIMS = [1, 3]  # 1 Row, 15 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
                # Thumbgrid is technically backlight ID
@@ -246,7 +297,9 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
                # Scroll wheel
                'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
                # #Macros
-               'get_macros', 'delete_macro', 'add_macro']
+               'get_macros', 'delete_macro', 'add_macro',
+               # Can set Logo, Scroll and thumbgrid with custom
+               'set_custom_effect', 'set_key_row']
 
     RAZER_URLS = {
         "store": "http://www.razerzone.com/store/razer-naga-hex-v2",
@@ -309,14 +362,16 @@ class RazerDeathadderElite(__RazerDeviceBrightnessSuspend):
 
     USB_VID = 0x1532
     USB_PID = 0x005c
-    HAS_MATRIX = False
-    MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 2]  # 1 Row, 15 Cols
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
                # Logo
                'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
                # Scroll wheel
-               'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2']
+               'set_scroll_static_naga_hex_v2', 'set_scroll_spectrum_naga_hex_v2', 'set_scroll_none_naga_hex_v2', 'set_scroll_reactive_naga_hex_v2', 'set_scroll_breath_random_naga_hex_v2', 'set_scroll_breath_single_naga_hex_v2', 'set_scroll_breath_dual_naga_hex_v2',
+               # Can set LOGO and Scrol with custom
+               'set_custom_effect', 'set_key_row']
 
     RAZER_URLS = {
         "store": "http://www.razerzone.com/gb-en/store/razer-deathadder-elite",
@@ -356,3 +411,20 @@ class RazerDeathadderElite(__RazerDeviceBrightnessSuspend):
         _da_set_logo_brightness(self, logo_brightness)
         _da_set_scroll_brightness(self, scroll_brightness)
         self.disable_notify = False
+
+
+class RazerDiamondbackChroma(__RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Mamba Chroma (Wired)
+    """
+    USB_VID = 0x1532
+    USB_PID = 0x004C
+    HAS_MATRIX = True
+    MATRIX_DIMS = [1, 19]  # 1 Row, 15 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness', 'set_wave_effect',
+               'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
+               'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
+               'get_dpi_xy', 'set_dpi_xy']
+
+    def __init__(self, *args, **kwargs):
+        super(RazerDiamondbackChroma, self).__init__(*args, **kwargs)
