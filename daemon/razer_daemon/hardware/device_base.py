@@ -6,6 +6,7 @@ import os
 import types
 import logging
 import time
+import json
 
 from razer_daemon.dbus_services.service import DBusService
 import razer_daemon.dbus_services.dbus_methods
@@ -32,7 +33,14 @@ class RazerDevice(DBusService):
 
     WAVE_DIRS = (1, 2)
 
-    def __init__(self, device_path, device_number, config, testing=False):
+    RAZER_URLS = {
+        "store": None,
+        "top_img": None,
+        "side_img": None,
+        "perspective_img": None
+    }
+
+    def __init__(self, device_path, device_number, config, testing=False, additional_interfaces=None):
 
         self.logger = logging.getLogger('razer.device{0}'.format(device_number))
         self.logger.info("Initialising device.%d %s", device_number, self.__class__.__name__)
@@ -40,6 +48,9 @@ class RazerDevice(DBusService):
         self._observer_list = []
         self._effect_sync_propagate_up = False
         self._disable_notifications = False
+        self.additional_interfaces = []
+        if additional_interfaces is not None:
+            self.additional_interfaces.extend(additional_interfaces)
 
         self.config = config
         self._testing = testing
@@ -51,8 +62,6 @@ class RazerDevice(DBusService):
         self._effect_sync = effect_sync.EffectSync(self, device_number)
 
         self._is_closed = False
-
-
 
         # Find event files in /dev/input/by-id/ by matching against regex
         self.event_files = []
@@ -82,6 +91,8 @@ class RazerDevice(DBusService):
 
         self.logger.debug("Adding razer.device.misc.getDeviceMode method to DBus")
         self.add_dbus_method('razer.device.misc', 'getDeviceMode', self.get_device_mode, out_signature='s')
+        self.logger.debug("Adding razer.device.misc.getRazerUrls method to DBus")
+        self.add_dbus_method('razer.device.misc', 'getRazerUrls', self.get_image_json, out_signature='s')
         self.logger.debug("Adding razer.device.misc.setDeviceMode method to DBus")
         self.add_dbus_method('razer.device.misc', 'setDeviceMode', self.set_device_mode, in_signature='yy')
         self.logger.debug("Adding razer.device.misc.resumeDevice method to DBus")
@@ -183,10 +194,15 @@ class RazerDevice(DBusService):
         with open(serial_path, 'r') as serial_file:
             count = 0
             serial = serial_file.read().strip()
+
             while len(serial) == 0:
                 if count >= 3:
                     break
-                serial = serial_file.read().strip()
+
+                try:
+                    serial = serial_file.read().strip()
+                except (PermissionError, OSError):
+                    serial = ''
 
                 count += 1
                 time.sleep(0.1)
@@ -244,6 +260,9 @@ class RazerDevice(DBusService):
         """
         result = [self.USB_VID, self.USB_PID]
         return result
+
+    def get_image_json(self):
+        return json.dumps(self.RAZER_URLS)
 
     def load_methods(self):
         """
@@ -375,16 +394,16 @@ class RazerDevice(DBusService):
         :param device_id: Device ID like 0000:0000:0000.0000
         :type device_id: str
 
-        :param dev_path: Device path. Normally '/sys/bus/hid/devices'
+        :param dev_path: Device path. Normally '/sys/bus/hid/devices/0000:0000:0000.0000'
         :type dev_path: str
 
         :return: True if its the correct device ID
         :rtype: bool
         """
-        pattern = r'^[0-9A-F]{4}:' + '{0:04X}'.format(cls.USB_VID) +':' + '{0:04X}'.format(cls.USB_PID) + r'\.[0-9A-F]{4}$'
+        pattern = r'^[0-9A-F]{4}:' + '{0:04X}'.format(cls.USB_VID) + ':' + '{0:04X}'.format(cls.USB_PID) + r'\.[0-9A-F]{4}$'
 
         if re.match(pattern, device_id) is not None:
-            if 'device_type' in  os.listdir(os.path.join(dev_path, device_id)):
+            if 'device_type' in os.listdir(dev_path):
                 return True
 
         return False
@@ -394,6 +413,7 @@ class RazerDevice(DBusService):
 
     def __repr__(self):
         return "{0}:{1}".format(self.__class__.__name__, self.serial)
+
 
 class RazerDeviceBrightnessSuspend(RazerDevice):
     """

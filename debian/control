@@ -5,7 +5,8 @@ Maintainer: Terry Cain <terry@terrys-home.co.uk>
 Standards-Version: 3.9.5
 Build-Depends: debhelper (>= 8.0.0),
                linux-headers-generic,
-               python3
+               python3,
+               python3-setuptools
 Homepage: https://terrycain.github.io/razer-drivers/
 Vcs-Git: git://git@github.com:terrycain/razer-drivers.git
 Vcs-Browser: https://github.com/terrycain/razer-drivers/
@@ -28,8 +29,10 @@ Depends: razer-kernel-modules-dkms,
          python3-dbus,
          python3-gi,
          python3-pyudev,
+         python3-evdev,
          python3-setproctitle,
          python3-notify2,
+         gir1.2-gtk-3.0,
          xautomation,
          xdotool
 Recommends: python3-razer

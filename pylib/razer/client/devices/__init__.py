@@ -1,3 +1,4 @@
+import json
 import dbus as _dbus
 from razer.client.fx import RazerFX as _RazerFX
 from xml.etree import ElementTree as _ET
@@ -27,11 +28,12 @@ class RazerDevice(object):
             'brightness': _dbus.Interface(self._dbus, "razer.device.lighting.brightness")
         }
 
-        self._name = self._dbus_interfaces['device'].getDeviceName()
-        self._type = self._dbus_interfaces['device'].getDeviceType()
-        self._fw = self._dbus_interfaces['device'].getFirmware()
-        self._drv_version = self._dbus_interfaces['device'].getDriverVersion()
+        self._name = str(self._dbus_interfaces['device'].getDeviceName())
+        self._type = str(self._dbus_interfaces['device'].getDeviceType())
+        self._fw = str(self._dbus_interfaces['device'].getFirmware())
+        self._drv_version = str(self._dbus_interfaces['device'].getDriverVersion())
         self._has_dedicated_macro = None
+        self._urls = None
 
         if vid_pid is None:
             self._vid, self._pid = self._dbus_interfaces['device'].getVidPid()
@@ -50,6 +52,7 @@ class RazerDevice(object):
             'macro_logic': self._has_feature('razer.device.macro'),
 
             # Default device is a chroma so lighting capabilities
+            'lighting': self._has_feature('razer.device.lighting.chroma'),
             'lighting_breath_single': self._has_feature('razer.device.lighting.chroma', 'setBreathSingle'),
             'lighting_breath_dual': self._has_feature('razer.device.lighting.chroma', 'setBreathDual'),
             'lighting_breath_triple': self._has_feature('razer.device.lighting.chroma', 'setBreathTriple'),
@@ -62,7 +65,7 @@ class RazerDevice(object):
             'lighting_ripple': self._has_feature('razer.device.lighting.custom', 'setRipple'),  # Thinking of extending custom to do more hence the key check
             'lighting_ripple_random': self._has_feature('razer.device.lighting.custom', 'setRippleRandomColour'),
 
-            'lighting_pulsate': self._has_feature('razer.device.lighting.chroma', 'setPulsate'),
+            'lighting_pulsate': self._has_feature('razer.device.lighting.bw2013', 'setPulsate'),
 
             # Get if the device has an LED Matrix, == True as its a DBus boolean otherwise, so for consistency sake we coerce it into a native bool
             'lighting_led_matrix': self._dbus_interfaces['device'].hasMatrix() == True,
@@ -70,6 +73,7 @@ class RazerDevice(object):
 
             # Mouse lighting attrs
             'lighting_logo': self._has_feature('razer.device.lighting.logo'),
+            'lighting_logo_active': self._has_feature('razer.device.lighting.logo', 'setLogoActive'),
             'lighting_logo_blinking': self._has_feature('razer.device.lighting.logo', 'setLogoBlinking'),
             'lighting_logo_brightness': self._has_feature('razer.device.lighting.logo', 'setLogoBrightness'),
             'lighting_logo_pulsate': self._has_feature('razer.device.lighting.logo', 'setLogoPulsate'),
@@ -82,6 +86,7 @@ class RazerDevice(object):
             'lighting_logo_breath_random': self._has_feature('razer.device.lighting.logo', 'setLogoBreathRandom'),
 
             'lighting_scroll': self._has_feature('razer.device.lighting.scroll'),
+            'lighting_scroll_active': self._has_feature('razer.device.lighting.scroll', 'setScrollActive'),
             'lighting_scroll_blinking': self._has_feature('razer.device.lighting.scroll', 'setScrollBlinking'),
             'lighting_scroll_brightness': self._has_feature('razer.device.lighting.scroll', 'setScrollBrightness'),
             'lighting_scroll_pulsate': self._has_feature('razer.device.lighting.scroll', 'setScrollPulsate'),
@@ -95,7 +100,8 @@ class RazerDevice(object):
 
         }
 
-        self._matrix_dimensions = self._dbus_interfaces['device'].getMatrixDimensions()
+        # Nasty hack to convert dbus.Int32 into native
+        self._matrix_dimensions = tuple([int(dim) for dim in self._dbus_interfaces['device'].getMatrixDimensions()])
 
         # Setup FX
         if self._FX is None:
@@ -269,6 +275,13 @@ class RazerDevice(object):
             self._has_dedicated_macro = self._dbus_interfaces['device'].hasDedicatedMacroKeys()
 
         return self._has_dedicated_macro
+
+    @property
+    def razer_urls(self) -> dict:
+        if self._urls is None:
+            self._urls = json.loads(str(self._dbus_interfaces['device'].getRazerUrls()))
+
+        return self._urls
 
     def __str__(self):
         return self._name
