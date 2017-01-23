@@ -1,6 +1,5 @@
 import numpy as _np
 import dbus as _dbus
-#from razer.client.constants import WAVE_LEFT, WAVE_RIGHT, REACTIVE_500MS, REACTIVE_1000MS, REACTIVE_1500MS, REACTIVE_2000MS
 from razer.client import constants as c
 
 #TODO logging.debug if value out of range v1.1
@@ -36,7 +35,8 @@ class BaseRazerFX(object):
         """
         Convenience function to check capability
 
-        Uses the main device capability list and automatically prefixes 'lighting_'
+        Uses the main device capability list and automatically prefixes 'lighting\_'
+
         :param capability: Device capability
         :type capability: str
 
@@ -47,7 +47,32 @@ class BaseRazerFX(object):
 
 
 class RazerFX(BaseRazerFX):
+    """
+    The generic effects class
+
+    If ``self.has('led_matrix')`` the field ``self.advanced`` will contain an instance of :class:`razer.client.fx.RazerAdvancedFX`.
+
+    ``self.misc`` will have an instance of :class:`razer.client.fx.MiscLighting` which handles individual LEDs
+
+    :ivar advanced: Advanced effect object: :class:`razer.client.fx.RazerAdvancedFX`
+    :ivar misc: Misc effects like for scroll wheel or logo: :class:`razer.client.fx.MiscLighting`
+    """
     def __init__(self, serial:str, capabilities:dict, daemon_dbus=None, matrix_dims=(-1, -1)):
+        """
+        Inits RazerFX
+
+        :param serial: Device serial
+        :type serial: str
+
+        :param capabilities: Capabilities Dictionary
+        :type capabilities: dict
+
+        :param daemon_dbus: DBus daemon object, if not provided we will create one
+        :type daemon_dbus: dict or None
+
+        :param matrix_dims: Dimensions (rows, cols) for advanced effects
+        :type matrix_dims: tuple[int] or list[int]
+        """
         super(RazerFX, self).__init__(serial, capabilities, daemon_dbus)
 
         self._lighting_dbus = _dbus.Interface(self._dbus, "razer.device.lighting.chroma")
@@ -104,6 +129,7 @@ class RazerFX(BaseRazerFX):
 
         :raises ValueError: If direction is invalid
         """
+        # TODO use range from daemon
         if direction not in (c.WAVE_LEFT, c.WAVE_RIGHT):
             raise ValueError("Direction must be WAVE_RIGHT (0x01) or WAVE_LEFT (0x02)")
 
@@ -115,7 +141,7 @@ class RazerFX(BaseRazerFX):
 
     def static(self, red:int, green:int, blue:int) -> bool:
         """
-        Wave effect
+        Static effect
 
         :param red: Red component. Must be 0->255
         :type red: int
@@ -129,7 +155,7 @@ class RazerFX(BaseRazerFX):
         :return: True if success, False otherwise
         :rtype: bool
 
-        :raises ValueError: If parameters are invalid
+        :raise ValueError: If parameters are invalid
         """
         if not isinstance(red, int):
             raise ValueError("Red is not an integer")
@@ -226,7 +252,7 @@ class RazerFX(BaseRazerFX):
     # TODO Change to tuple of rgb
     def breath_dual(self, red:int, green:int, blue:int, red2:int, green2:int, blue2:int) -> bool:
         """
-        Breath effect - single colour
+        Breath effect - dual colours
 
         :param red: First red component. Must be 0->255
         :type red: int
@@ -279,7 +305,7 @@ class RazerFX(BaseRazerFX):
 
     def breath_triple(self, red: int, green: int, blue: int, red2: int, green2: int, blue2: int, red3: int, green3: int, blue3: int) -> bool:
         """
-        Breath effect - single colour
+        Breath effect - three colours
 
         :param red: First red component. Must be 0->255
         :type red: int
