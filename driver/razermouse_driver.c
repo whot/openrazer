@@ -85,6 +85,68 @@ struct razer_report razer_send_payload(struct usb_device *usb_dev, struct razer_
     return response_report;
 }
 
+/*
+ * Specific functions for ancient devices
+ *
+ */
+void deathadder3500_set_scroll_led_state(struct razer_mouse_device *device, unsigned int enabled)
+{
+    char data[4] = { 0 };
+
+    if (enabled == 1) {
+        device->da3500_lighting_bitfield |= 0x02;
+    } else {
+        device->da3500_lighting_bitfield &= ~(0x02);
+    }
+
+    data[0] = device->da3500_poll_bitfield;
+    data[3] = device->da3500_lighting_bitfield;
+
+    mutex_lock(&device->lock);
+    razer_send_control_msg_old_device(device->usb_dev, &data[0], 0x10, 0x00, 4, 3000, 3000);
+    mutex_unlock(&device->lock);
+}
+void deathadder3500_set_logo_led_state(struct razer_mouse_device *device, unsigned int enabled)
+{
+    char data[4] = { 0 };
+
+    if (enabled == 1) {
+        device->da3500_lighting_bitfield |= 0x01;
+    } else {
+        device->da3500_lighting_bitfield &= ~(0x01);
+    }
+
+    data[0] = device->da3500_poll_bitfield;
+    data[3] = device->da3500_lighting_bitfield;
+
+    mutex_lock(&device->lock);
+    razer_send_control_msg_old_device(device->usb_dev, &data[0], 0x10, 0x00, 4, 3000, 3000);
+    mutex_unlock(&device->lock);
+}
+void deathadder3500_set_poll_rate(struct razer_mouse_device *device, unsigned short poll_rate)
+{
+    char data[4] = { 0 };
+
+    if (poll_rate == 1000) {
+        device->da3500_poll_bitfield = 1;
+    } else if (poll_rate == 500) {
+        device->da3500_poll_bitfield = 2;
+    } else if (poll_rate == 125) {
+        device->da3500_poll_bitfield = 3;
+    } else {
+        device->da3500_poll_bitfield = 2;
+    }
+
+    data[0] = device->da3500_poll_bitfield;
+    data[3] = device->da3500_lighting_bitfield;
+
+    mutex_lock(&device->lock);
+    razer_send_control_msg_old_device(device->usb_dev, &data[0], 0x10, 0x00, 4, 3000, 3000);
+    mutex_unlock(&device->lock);
+}
+
+
+
 
 /*
  * New functions
@@ -578,20 +640,36 @@ static ssize_t razer_attr_write_set_charging_colour(struct device *dev, struct d
  */
 static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report report = razer_chroma_misc_get_polling_rate();
     struct razer_report response_report;
     unsigned short polling_rate = 0;
 
-    switch(usb_dev->descriptor.idProduct) {
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
+        switch(device->da3500_poll_bitfield) {
+        case 0x01:
+            polling_rate = 1000;
+            break;
+        case  0x02:
+            polling_rate = 500;
+            break;
+        case  0x03:
+            polling_rate = 125;
+            break;
+        }
+        return sprintf(buf, "%d\n", polling_rate);
+        break;
+
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
         report.transaction_id.id = 0x3f;
         break;
     }
 
-    response_report = razer_send_payload(usb_dev, &report);
+    mutex_lock(&device->lock);
+    response_report = razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
 
     switch(response_report.arguments[0]) {
     case 0x01:
@@ -615,12 +693,16 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
  */
 static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     unsigned short polling_rate = (unsigned short)simple_strtoul(buf, NULL, 10);
     struct razer_report report = razer_chroma_misc_set_polling_rate(polling_rate);
 
-    switch(usb_dev->descriptor.idProduct) {
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
+        deathadder3500_set_poll_rate(device, polling_rate);
+        return count;
+        break;
+
     case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
@@ -629,7 +711,9 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
         break;
     }
 
-    razer_send_payload(usb_dev, &report);
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
 
     return count;
 }
@@ -1138,13 +1222,22 @@ static ssize_t razer_attr_write_logo_led_brightness(struct device *dev, struct d
  */
 static ssize_t razer_attr_write_scroll_led_state(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report report = razer_chroma_standard_set_led_state(VARSTORE, SCROLL_WHEEL_LED, enabled);
     report.transaction_id.id = 0x3F;
 
-    razer_send_payload(usb_dev, &report);
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
+        deathadder3500_set_scroll_led_state(device, enabled);
+        return count;
+        break;
+    }
+
+
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
 
     return count;
 }
@@ -1154,13 +1247,24 @@ static ssize_t razer_attr_write_scroll_led_state(struct device *dev, struct devi
  */
 static ssize_t razer_attr_read_scroll_led_state(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report report = razer_chroma_standard_get_led_state(VARSTORE, SCROLL_WHEEL_LED);
     struct razer_report response;
     report.transaction_id.id = 0x3F;
 
-    response = razer_send_payload(usb_dev, &report);
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
+        if((device->da3500_lighting_bitfield & 0x02) == 0x02) {
+            return sprintf(buf, "1\n");
+        }
+        return sprintf(buf, "0\n");
+        break;
+    }
+
+    mutex_lock(&device->lock);
+    response = razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
+
     return sprintf(buf, "%d\n", response.arguments[2]);
 }
 
@@ -1169,13 +1273,21 @@ static ssize_t razer_attr_read_scroll_led_state(struct device *dev, struct devic
  */
 static ssize_t razer_attr_write_logo_led_state(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     unsigned char enabled = (unsigned char)simple_strtoul(buf, NULL, 10);
     struct razer_report report = razer_chroma_standard_set_led_state(VARSTORE, LOGO_LED, enabled);
     report.transaction_id.id = 0x3F;
 
-    razer_send_payload(usb_dev, &report);
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
+        deathadder3500_set_logo_led_state(device, enabled);
+        return count;
+        break;
+    }
+
+    mutex_lock(&device->lock);
+    razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
 
     return count;
 }
@@ -1185,12 +1297,24 @@ static ssize_t razer_attr_write_logo_led_state(struct device *dev, struct device
  */
 static ssize_t razer_attr_read_logo_led_state(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    struct usb_interface *intf = to_usb_interface(dev->parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
     struct razer_report report = razer_chroma_standard_get_led_state(VARSTORE, LOGO_LED);
     struct razer_report response;
     report.transaction_id.id = 0x3F;
-    response = razer_send_payload(usb_dev, &report);
+
+    switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
+        if((device->da3500_lighting_bitfield & 0x01) == 0x01) {
+            return sprintf(buf, "1\n");
+        }
+        return sprintf(buf, "0\n");
+        break;
+    }
+
+
+    mutex_lock(&device->lock);
+    response = razer_send_payload(device->usb_dev, &report);
+    mutex_unlock(&device->lock);
 
     return sprintf(buf, "%d\n", response.arguments[2]);
 }
@@ -1841,6 +1965,10 @@ void razer_mouse_init(struct razer_mouse_device *dev, struct usb_interface *intf
     // Get a "random" integer
     get_random_bytes(&rand_serial, sizeof(unsigned int));
     sprintf(&dev->serial[0], "PM%012u", rand_serial);
+
+    // Setup default values for DeathAdder 3500
+    dev->da3500_lighting_bitfield = 3; // Lights up all lights
+    dev->da3500_poll_bitfield = 1; // Freq 1000
 }
 
 /**
@@ -2033,6 +2161,12 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_led_state);
+            break;
+
+        case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_state);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_state);
             break;
 
         case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
@@ -2270,6 +2404,12 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_scroll_led_state);
             device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
             device_remove_file(&hdev->dev, &dev_attr_backlight_led_state);
+            break;
+
+        case USB_DEVICE_ID_RAZER_DEATHADDER_3500:
+            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_led_state);
+            device_remove_file(&hdev->dev, &dev_attr_logo_led_state);
             break;
 
         case USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA:
