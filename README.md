@@ -41,6 +41,7 @@ Also this is the master branch, devices may appear in the tables below but might
 | Razer Mamba 2012 (Wireless)     |  1532:0025  |   ✔    |   ✔    |
 | Razer Imperator 2012            |  1532:002F  |   ✔    |   ✔    |
 | Razer Ouroboros 2012            |  1532:0032  |   ✔    |   ✔    |
+| Razer Ouroboros 2012 (Wireless) |  1532:0033  |   ✔    |   ✔    |
 | Razer Taipan                    |  1532:0034  |   ✔    |   ✔    |
 | Razer Naga Hex (Red)            |  1532:0036  |   ✔    |   ✔    |
 | Razer Naga 2014                 |  1532:0040  |   ✔    |   ✔    |
