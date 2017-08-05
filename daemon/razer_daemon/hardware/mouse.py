@@ -843,3 +843,54 @@ class RazerOrochi2011(__RazerDeviceBrightnessSuspend):
         _da_set_logo_active(self, logo_active)
         _da_set_scroll_active(self, scroll_active)
         self.disable_notify = False
+
+
+class RazerNagaEpic(__RazerDevice):
+    """
+    Class for the Razer Naga Hex
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_Naga_Epic-if01-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x001F
+    HAS_MATRIX = False
+    DEDICATED_MACRO_KEYS = True
+    MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate',
+               'get_scroll_effect', 'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_static', 'set_scroll_spectrum',
+               'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold']
+
+    RAZER_URLS = {
+        "store": None,
+        "top_img": "https://assets.razerzone.com/eeimages/products/12/razer-naga-hex-gallery-12.png",
+        "side_img": "https://assets.razerzone.com/eeimages/products/12/razer-naga-hex-gallery-11.png",
+        "perspective_img": "https://assets.razerzone.com/eeimages/products/12/razer-naga-hex-gallery-7.png"
+    }
+
+    DPI_MAX = 5600
+
+    def _suspend_device(self):
+        """
+        Suspend the device
+
+        Get the current brightness level, store it for later and then set the brightness to 0
+        """
+        self.suspend_args.clear()
+        self.suspend_args['brightness'] = _da_get_scroll_brightness(self)
+
+        # Todo make it context?
+        self.disable_notify = True
+        _da_set_scroll_brightness(self, 0)
+        self.disable_notify = False
+
+    def _resume_device(self):
+        """
+        Resume the device
+
+        Get the last known brightness and then set the brightness
+        """
+        scroll_brightness = self.suspend_args.get('brightness', 255)
+
+        self.disable_notify = True
+        _da_set_scroll_brightness(self, scroll_brightness)
+        self.disable_notify = False
