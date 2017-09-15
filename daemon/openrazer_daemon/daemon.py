@@ -297,14 +297,14 @@ class RazerDaemon(DBusService):
         Suspend all devices
         """
         for device in self._razer_devices:
-            device.dbus.suspend_device()
+            device.dbus.suspendDevice()
 
     def resume_devices(self):
         """
         Resume all devices
         """
         for device in self._razer_devices:
-            device.dbus.resume_device()
+            device.dbus.resumeDevice()
 
     @dbus.service.method('razer.devices', out_signature='as')
     def getDevices(self):
@@ -406,7 +406,7 @@ class RazerDaemon(DBusService):
                     count = 0
                     while count < 3:
                         # Loop to get serial, exit early if it gets one
-                        device_serial = razer_device.get_serial()
+                        device_serial = razer_device.getSerial()
                         if len(device_serial) > 0:
                             break
                         time.sleep(0.1)
@@ -442,7 +442,7 @@ class RazerDaemon(DBusService):
                 time.sleep(0.2)
 
                 # Wireless devices sometimes dont listen
-                device_serial = razer_device.get_serial()
+                device_serial = razer_device.getSerial()
 
                 if len(device_serial) > 0:
                     # Add Device

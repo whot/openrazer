@@ -9,6 +9,8 @@ import time
 import json
 import random
 
+import dbus
+
 from openrazer_daemon.dbus_services.service import DBusService
 import openrazer_daemon.dbus_services.dbus_methods
 from openrazer_daemon.misc import effect_sync
@@ -62,7 +64,7 @@ class RazerDevice(DBusService):
         self._parent = None
         self._device_path = device_path
         self._device_number = device_number
-        self.serial = self.get_serial()
+        self.serial = self.getSerial()
 
         self._effect_sync = effect_sync.EffectSync(self, device_number)
 
@@ -89,16 +91,7 @@ class RazerDevice(DBusService):
         self.method_args = {}
 
         methods = {
-            # interface, method, callback, in-args, out-args
-            ('razer.device.misc', 'getSerial', self.get_serial, None, 's'),
-            ('razer.device.misc', 'suspendDevice', self.suspend_device, None, None),
-            ('razer.device.misc', 'getDeviceMode', self.get_device_mode, None, 's'),
-            ('razer.device.misc', 'getRazerUrls', self.get_image_json, None, 's'),
-            ('razer.device.misc', 'setDeviceMode', self.set_device_mode, 'yy', None),
-            ('razer.device.misc', 'resumeDevice', self.resume_device, None, None),
-            ('razer.device.misc', 'getVidPid', self.get_vid_pid, None, 'ai'),
             ('razer.device.misc', 'getDriverVersion', openrazer_daemon.dbus_services.dbus_methods.version, None, 's'),
-            ('razer.device.misc', 'hasDedicatedMacroKeys', self.dedicated_macro_keys, None, 'b'),
         }
 
         for m in methods:
@@ -123,7 +116,8 @@ class RazerDevice(DBusService):
 
         self.notify_observers(tuple(payload))
 
-    def dedicated_macro_keys(self):
+    @dbus.service.method('razer.device.misc', out_signature='b')
+    def hasDedicatedMacroKeys(self):
         """
         Returns if the device has dedicated macro keys
 
@@ -184,7 +178,8 @@ class RazerDevice(DBusService):
         """
         return os.path.join(self._device_path, driver_filename)
 
-    def get_serial(self):
+    @dbus.service.method('razer.device.misc', out_signature='s')
+    def getSerial(self):
         """
         Get serial number for device
 
@@ -219,7 +214,8 @@ class RazerDevice(DBusService):
 
         return self._serial
 
-    def get_device_mode(self):
+    @dbus.service.method('razer.device.misc', out_signature='s')
+    def getDeviceMode(self):
         """
         Get device mode
 
@@ -240,7 +236,8 @@ class RazerDevice(DBusService):
 
             return mode
 
-    def set_device_mode(self, mode_id, param):
+    @dbus.service.method('razer.device.misc', in_signature='yy')
+    def setDeviceMode(self, mode_id, param):
         """
         Set device mode
 
@@ -261,7 +258,8 @@ class RazerDevice(DBusService):
 
             mode_file.write(bytes([mode_id, param]))
 
-    def get_vid_pid(self):
+    @dbus.service.method('razer.device.misc', out_signature='ai')
+    def getVidPid(self):
         """
         Get the usb VID PID
 
@@ -271,7 +269,8 @@ class RazerDevice(DBusService):
         result = [self.USB_VID, self.USB_PID]
         return result
 
-    def get_image_json(self):
+    @dbus.service.method('razer.device.misc', out_signature='s')
+    def getRazerUrls(self):
         return json.dumps(self.RAZER_URLS)
 
     def load_methods(self):
@@ -295,14 +294,16 @@ class RazerDevice(DBusService):
             except KeyError:
                 pass
 
-    def suspend_device(self):
+    @dbus.service.method('razer.device.misc')
+    def suspendDevice(self):
         """
         Suspend device
         """
         self.logger.info("Suspending %s", self.__class__.__name__)
         self._suspend_device()
 
-    def resume_device(self):
+    @dbus.service.method('razer.device.misc')
+    def resumeDevice(self):
         """
         Resume device
         """
