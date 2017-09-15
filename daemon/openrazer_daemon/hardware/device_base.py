@@ -429,6 +429,118 @@ class RazerDevice(DBusService):
         return "{0}:{1}".format(self.__class__.__name__, self.serial)
 
 
+    def _read_10(self, filename):
+        """
+        :param filename: a driver file in the sysfs tree
+        :return: 1 or 0 depending on the file's content
+        """
+        with open(self.get_driver_path(filename)) as f:
+            b = f.read().strip()
+            if b != '0' and b != '1':
+                self.logger.error("Bug: expected bool but got {} in {}".format(b, filename))
+            return int(b) == 1
+
+    def _read_int(self, filename, base=10):
+        """
+        :param filename: a driver file in the sysfs tree
+        :return: the integer value of the file
+        """
+        with open(self.get_driver_path(filename)) as f:
+            i = f.read().strip()
+            return int(i, base)
+
+    def _read_percent(self, filename, maxval=None):
+        """
+        :param filename: a driver file in the sysfs tree
+        :param maxval: if set, the returned value is normalized for the range
+                       0 to maxval
+        :return: a double between 0 and 100
+        """
+        with open(self.get_driver_path(filename)) as f:
+            d = float(f.read().strip())
+            if maxval is not None:
+                if maxval < d:
+                    self.logger.error("Bug: have {} but max is {}".format(d, maxval))
+                d = d/maxval
+
+            return round(d, 2)
+
+    def _read_bytes(self, filename):
+        """
+        :param filename: a driver file in the sysfs tree
+        :return: an array of bytes
+        """
+
+        with open(self.get_driver_path(filename), 'rb') as f:
+            return f.read()
+
+    def _read_string(self, filename):
+        """
+        :param filename: a driver file in the sysfs tree
+        :return: the string content of the file, stripped of linebreaks
+        """
+        with open(self.get_driver_path(filename)) as f:
+            return f.read().strip()
+
+
+    def _write_10(self, filename, arg):
+        """
+        :param filename: a driver file in the sysfs tree
+        :param arg: a boolean argument to write to the file as 0 or 1
+        """
+        with open(self.get_driver_path(filename), 'w') as f:
+            f.write('1' if arg else '0')
+
+        return arg
+
+    def _write_int(self, filename, arg):
+        """
+        :param filename: a driver file in the sysfs tree
+        :param arg: an integer argument to write to the file
+        """
+        with open(self.get_driver_path(filename), 'w') as f:
+            arg = int(arg)
+            f.write(str(arg))
+
+        return arg
+
+    def _write_percent(self, filename, arg, maxval=None):
+        """
+        :param filename: a driver file in the sysfs tree
+        :param arg: a value between 0 and 100
+        :param maxval: if set, arg is scaled to 0..maval
+        """
+        if arg < 0 or arg > 100:
+            self.logger.error("Bug: expected normalized double, but have {}".format(arg))
+            arg = min(max(0, arg), 100)
+
+        with open(self.get_driver_path(filename), 'w') as f:
+            if maxval is not None:
+                arg = int(round(maxval * arg/100.0))
+
+            f.write(str(arg))
+
+        return arg
+
+    def _write_string(self, filename, arg):
+        """
+        :param filename: a driver file in the sysfs tree
+        :param arg: a string argument to write to the file
+        """
+        with open(self.get_driver_path(filename), 'w') as f:
+            f.write(arg)
+
+    def _write_bytes(self, filename, arg):
+        """
+        :param filename: a driver file in the sysfs tree
+        :param arg: a list of bytes to write to the file
+        """
+        with open(self.get_driver_path(filename), 'wb') as f:
+            f.write(bytes(arg))
+
+        return arg
+
+
 class RazerDeviceBrightnessSuspend(RazerDevice):
     """
     Class for suspend using brightness
