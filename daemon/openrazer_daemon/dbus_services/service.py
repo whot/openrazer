@@ -109,6 +109,12 @@ class DBusService(dbus.service.Object):
         :type byte_arrays: bool
         """
 
+        # FIXME: whatever happens with the dbus bits here - we can't have
+        # two functions of the same name even when they're in seprate
+        # interfaces
+
+        fname = "{}_{}".format(interface_name, function_name).replace('.', '_')
+        print("add function" , fname, "func is ", function)
         # Get class key for use in the DBus introspection table
         class_key = [key for key in self._dbus_class_table.keys() if key.endswith(self.__class__.__name__)][0]
 

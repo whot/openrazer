@@ -1,6 +1,6 @@
 from openrazer_daemon.dbus_services import endpoint
 
-@endpoint('razer.device.lighting.logo', 'setLogoStatic', in_sig='yyy')
+@endpoint('razer.device.lighting.logo', 'setStatic', in_sig='yyy')
 def set_logo_static_naga_hex_v2(self, red, green, blue):
     """
     Set the device to static colour
@@ -22,7 +22,7 @@ def set_logo_static_naga_hex_v2(self, red, green, blue):
     self._write_bytes('logo_matrix_effect_static', [red, green, blue])
 
 
-@endpoint('razer.device.lighting.logo', 'setLogoSpectrum')
+@endpoint('razer.device.lighting.logo', 'setSpectrum')
 def set_logo_spectrum_naga_hex_v2(self):
     """
     Set the device to pulsate
@@ -44,7 +44,7 @@ def set_logo_spectrum_naga_hex_v2(self):
     self._write_10('logo_matrix_effect_spectrum', 1)
 
 
-@endpoint('razer.device.lighting.logo', 'setLogoNone')
+@endpoint('razer.device.lighting.logo', 'setNone')
 def set_logo_none_naga_hex_v2(self):
     """
     Set the device to spectrum mode
@@ -57,7 +57,7 @@ def set_logo_none_naga_hex_v2(self):
     self._write_10('logo_matrix_effect_none', 1)
 
 
-@endpoint('razer.device.lighting.logo', 'setLogoReactive', in_sig='yyyy')
+@endpoint('razer.device.lighting.logo', 'setReactive', in_sig='yyyy')
 def set_logo_reactive_naga_hex_v2(self, red, green, blue, speed):
     """
     Set the device to reactive effect
@@ -85,7 +85,7 @@ def set_logo_reactive_naga_hex_v2(self, red, green, blue, speed):
     self._write_bytes('logo_matrix_effect_reactive', [red, green, blue, speed])
 
 
-@endpoint('razer.device.lighting.logo', 'setLogoBreathRandom')
+@endpoint('razer.device.lighting.logo', 'setBreathRandom')
 def set_logo_breath_random_naga_hex_v2(self):
     """
     Set the device to random colour breathing effect
@@ -100,7 +100,7 @@ def set_logo_breath_random_naga_hex_v2(self):
     self._write_bytes('logo_matrix_effect_breath', [payload])
 
 
-@endpoint('razer.device.lighting.logo', 'setLogoBreathSingle', in_sig='yyy')
+@endpoint('razer.device.lighting.logo', 'setBreathSingle', in_sig='yyy')
 def set_logo_breath_single_naga_hex_v2(self, red, green, blue):
     """
     Set the device to single colour breathing effect
@@ -122,7 +122,7 @@ def set_logo_breath_single_naga_hex_v2(self, red, green, blue):
     self._write_bytes('logo_matrix_effect_breath', [red, green, blue])
 
 
-@endpoint('razer.device.lighting.logo', 'setLogoBreathDual', in_sig='yyyyyy')
+@endpoint('razer.device.lighting.logo', 'setBreathDual', in_sig='yyyyyy')
 def set_logo_breath_dual_naga_hex_v2(self, red1, green1, blue1, red2, green2, blue2):
     """
     Set the device to dual colour breathing effect
@@ -154,7 +154,7 @@ def set_logo_breath_dual_naga_hex_v2(self, red1, green1, blue1, red2, green2, bl
                       [red1, green1, blue1, red2, green2, blue2])
 
 
-@endpoint('razer.device.lighting.scroll', 'setScrollStatic', in_sig='yyy')
+@endpoint('razer.device.lighting.scroll', 'setStatic', in_sig='yyy')
 def set_scroll_static_naga_hex_v2(self, red, green, blue):
     """
     Set the device to static colour
@@ -178,7 +178,7 @@ def set_scroll_static_naga_hex_v2(self, red, green, blue):
     self._write_bytes('scroll_matrix_effect_static', [red, green, blue])
 
 
-@endpoint('razer.device.lighting.scroll', 'setScrollSpectrum')
+@endpoint('razer.device.lighting.scroll', 'setSpectrum')
 def set_scroll_spectrum_naga_hex_v2(self):
     """
     Set the device to pulsate
@@ -200,7 +200,7 @@ def set_scroll_spectrum_naga_hex_v2(self):
     self._write_10('scroll_matrix_effect_spectrum', 1)
 
 
-@endpoint('razer.device.lighting.scroll', 'setScrollNone')
+@endpoint('razer.device.lighting.scroll', 'setNone')
 def set_scroll_none_naga_hex_v2(self):
     """
     Set the device to spectrum mode
@@ -213,7 +213,7 @@ def set_scroll_none_naga_hex_v2(self):
     self._write_10('scroll_matrix_effect_none', 1)
 
 
-@endpoint('razer.device.lighting.scroll', 'setScrollReactive', in_sig='yyyy')
+@endpoint('razer.device.lighting.scroll', 'setReactive', in_sig='yyyy')
 def set_scroll_reactive_naga_hex_v2(self, red, green, blue, speed):
     """
     Set the device to reactive effect
@@ -242,7 +242,7 @@ def set_scroll_reactive_naga_hex_v2(self, red, green, blue, speed):
                       [speed, red, green, blue])
 
 
-@endpoint('razer.device.lighting.scroll', 'setScrollBreathRandom')
+@endpoint('razer.device.lighting.scroll', 'setBreathRandom')
 def set_scroll_breath_random_naga_hex_v2(self):
     """
     Set the device to random colour breathing effect
@@ -259,7 +259,7 @@ def set_scroll_breath_random_naga_hex_v2(self):
     self._write_bytes('scroll_matrix_effect_breath', [payload])
 
 
-@endpoint('razer.device.lighting.scroll', 'setScrollBreathSingle', in_sig='yyy')
+@endpoint('razer.device.lighting.scroll', 'setBreathSingle', in_sig='yyy')
 def set_scroll_breath_single_naga_hex_v2(self, red, green, blue):
     """
     Set the device to single colour breathing effect
@@ -283,7 +283,7 @@ def set_scroll_breath_single_naga_hex_v2(self, red, green, blue):
     self._write_bytes('scroll_matrix_effect_breath', [red, green, blue])
 
 
-@endpoint('razer.device.lighting.scroll', 'setScrollBreathDual', in_sig='yyyyyy')
+@endpoint('razer.device.lighting.scroll', 'setBreathDual', in_sig='yyyyyy')
 def set_scroll_breath_dual_naga_hex_v2(self, red1, green1, blue1, red2, green2, blue2):
     """
     Set the device to dual colour breathing effect

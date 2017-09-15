@@ -1,7 +1,7 @@
 from openrazer_daemon.dbus_services import endpoint
 
 
-@endpoint('razer.device.lighting.backlight', 'getBacklightActive', out_sig='b')
+@endpoint('razer.device.lighting.backlight', 'getActive', out_sig='b')
 def get_backlight_active(self):
     """
     Get if the backlight is lit up
@@ -14,7 +14,7 @@ def get_backlight_active(self):
     return self._read_10('backlight_led_state')
 
 
-@endpoint('razer.device.lighting.backlight', 'setBacklightActive', in_sig='b')
+@endpoint('razer.device.lighting.backlight', 'setActive', in_sig='b')
 def set_backlight_active(self, active):
     """
     Get if the backlight is lit up
@@ -27,7 +27,7 @@ def set_backlight_active(self, active):
     self._write_10('backlight_led_state', active)
 
 
-@endpoint('razer.device.lighting.logo', 'getLogoActive', out_sig='b')
+@endpoint('razer.device.lighting.logo', 'getActive', out_sig='b')
 def get_logo_active(self):
     """
     Get if the logo is light up
@@ -40,7 +40,7 @@ def get_logo_active(self):
     return self._read_10('logo_led_state')
 
 
-@endpoint('razer.device.lighting.logo', 'setLogoActive', in_sig='b')
+@endpoint('razer.device.lighting.logo', 'setActive', in_sig='b')
 def set_logo_active(self, active):
     """
     Get if the logo is light up
@@ -53,7 +53,7 @@ def set_logo_active(self, active):
     self._write_10('logo_led_state', active)
 
 
-@endpoint('razer.device.lighting.logo', 'getLogoEffect', out_sig='y')
+@endpoint('razer.device.lighting.logo', 'getEffect', out_sig='y')
 def get_logo_effect(self):
     """
     Get logo effect
@@ -66,7 +66,7 @@ def get_logo_effect(self):
     return self._read_int('logo_led_effect')
 
 
-@endpoint('razer.device.lighting.logo', 'getLogoBrightness', out_sig='d')
+@endpoint('razer.device.lighting.logo', 'getBrightness', out_sig='d')
 def get_logo_brightness(self):
     """
     Get the device's brightness
@@ -78,7 +78,7 @@ def get_logo_brightness(self):
 
     return self._read_percent('logo_led_brightness', maxval=255)
 
-@endpoint('razer.device.lighting.logo', 'setLogoBrightness', in_sig='d')
+@endpoint('razer.device.lighting.logo', 'setBrightness', in_sig='d')
 def set_logo_brightness(self, brightness):
     """
     Set the device's brightness
@@ -95,7 +95,7 @@ def set_logo_brightness(self, brightness):
     self.send_effect_event('setBrightness', brightness)
 
 
-@endpoint('razer.device.lighting.logo', 'setLogoStatic', in_sig='yyy')
+@endpoint('razer.device.lighting.logo', 'setStatic', in_sig='yyy')
 def set_logo_static(self, red, green, blue):
     """
     Set the device to static colour
@@ -117,7 +117,7 @@ def set_logo_static(self, red, green, blue):
     self._write_bytes('logo_led_rgb', [red, green, blue])
     self._write_int('logo_led_effect', 0)
 
-@endpoint('razer.device.lighting.logo', 'setLogoBlinking', in_sig='yyy')
+@endpoint('razer.device.lighting.logo', 'setBlinking', in_sig='yyy')
 def set_logo_blinking(self, red, green, blue):
     """
     Set the device to pulsate
@@ -140,7 +140,7 @@ def set_logo_blinking(self, red, green, blue):
     self._write_int('logo_led_effect', 1)
 
 
-@endpoint('razer.device.lighting.logo', 'setLogoPulsate', in_sig='yyy')
+@endpoint('razer.device.lighting.logo', 'setPulsate', in_sig='yyy')
 def set_logo_pulsate(self, red, green, blue):
     """
     Set the device to pulsate
@@ -163,7 +163,7 @@ def set_logo_pulsate(self, red, green, blue):
     self._write_int('logo_led_effect', 2)
 
 
-@endpoint('razer.device.lighting.logo', 'setLogoSpectrum')
+@endpoint('razer.device.lighting.logo', 'setSpectrum')
 def set_logo_spectrum(self):
     """
     Set the device to pulsate
@@ -185,7 +185,7 @@ def set_logo_spectrum(self):
     self._write_int('logo_led_effect', 4)
 
 
-@endpoint('razer.device.lighting.scroll', 'getScrollActive', out_sig='b')
+@endpoint('razer.device.lighting.scroll', 'getActive', out_sig='b')
 def get_scroll_active(self):
     """
     Get if the scroll is light up
@@ -197,7 +197,7 @@ def get_scroll_active(self):
 
     return self._read_10('scroll_led_state')
 
-@endpoint('razer.device.lighting.scroll', 'setScrollActive', in_sig='b')
+@endpoint('razer.device.lighting.scroll', 'setActive', in_sig='b')
 def set_scroll_active(self, active):
     """
     Get if the scroll is light up
@@ -210,7 +210,7 @@ def set_scroll_active(self, active):
     self._write_10('scroll_led_state', active)
 
 
-@endpoint('razer.device.lighting.scroll', 'getScrollEffect', out_sig='y')
+@endpoint('razer.device.lighting.scroll', 'getEffect', out_sig='y')
 def get_scroll_effect(self):
     """
     Get scroll effect
@@ -223,7 +223,7 @@ def get_scroll_effect(self):
     return self._read_int('scroll_led_effect')
 
 
-@endpoint('razer.device.lighting.scroll', 'getScrollBrightness', out_sig='d')
+@endpoint('razer.device.lighting.scroll', 'getBrightness', out_sig='d')
 def get_scroll_brightness(self):
     """
     Get the device's brightness
@@ -236,7 +236,7 @@ def get_scroll_brightness(self):
     return self._read_percent('scroll_led_brightness', maxval=255)
 
 
-@endpoint('razer.device.lighting.scroll', 'setScrollBrightness', in_sig='d')
+@endpoint('razer.device.lighting.scroll', 'setBrightness', in_sig='d')
 def set_scroll_brightness(self, brightness):
     """
     Set the device's brightness
@@ -253,7 +253,7 @@ def set_scroll_brightness(self, brightness):
     self.send_effect_event('setBrightness', brightness)
 
 
-@endpoint('razer.device.lighting.scroll', 'setScrollStatic', in_sig='yyy')
+@endpoint('razer.device.lighting.scroll', 'setStatic', in_sig='yyy')
 def set_scroll_static(self, red, green, blue):
     """
     Set the device to static colour
@@ -276,7 +276,7 @@ def set_scroll_static(self, red, green, blue):
     self._write_int('scroll_led_effect', 0)
 
 
-@endpoint('razer.device.lighting.scroll', 'setScrollBlinking', in_sig='yyy')
+@endpoint('razer.device.lighting.scroll', 'setBlinking', in_sig='yyy')
 def set_scroll_blinking(self, red, green, blue):
     """
     Set the device to pulsate
@@ -299,7 +299,7 @@ def set_scroll_blinking(self, red, green, blue):
     self._write_int('scroll_led_effect', 1)
 
 
-@endpoint('razer.device.lighting.scroll', 'setScrollPulsate', in_sig='yyy')
+@endpoint('razer.device.lighting.scroll', 'setPulsate', in_sig='yyy')
 def set_scroll_pulsate(self, red, green, blue):
     """
     Set the device to pulsate
@@ -322,7 +322,7 @@ def set_scroll_pulsate(self, red, green, blue):
     self._write_int('scroll_led_effect', 2)
 
 
-@endpoint('razer.device.lighting.scroll', 'setScrollSpectrum')
+@endpoint('razer.device.lighting.scroll', 'setSpectrum')
 def set_scroll_spectrum(self):
     """
     Set the device to pulsate

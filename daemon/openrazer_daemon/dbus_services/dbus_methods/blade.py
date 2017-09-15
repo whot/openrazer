@@ -1,7 +1,7 @@
 from openrazer_daemon.dbus_services import endpoint
 
 
-@endpoint('razer.device.lighting.logo', 'getLogoActive', out_sig='b')
+@endpoint('razer.device.lighting.logo', 'getActive', out_sig='b')
 def blade_get_logo_active(self):
     """
     Get if the logo is light up
@@ -15,7 +15,7 @@ def blade_get_logo_active(self):
     return 0 if self._read_10('logo_led_state') else 1
 
 
-@endpoint('razer.device.lighting.logo', 'setLogoActive', in_sig='b')
+@endpoint('razer.device.lighting.logo', 'setActive', in_sig='b')
 def blade_set_logo_active(self, active):
     """
     Get if the logo is light up
