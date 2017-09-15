@@ -19,12 +19,7 @@ def set_logo_static_naga_hex_v2(self, red, green, blue):
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
 
-    rgb_driver_path = self.get_driver_path('logo_matrix_effect_static')
-
-    payload = bytes([red, green, blue])
-
-    with open(rgb_driver_path, 'wb') as rgb_driver_file:
-        rgb_driver_file.write(payload)
+    self._write_bytes('logo_matrix_effect_static', [red, green, blue])
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoSpectrum')
@@ -46,10 +41,7 @@ def set_logo_spectrum_naga_hex_v2(self):
     # Notify others
     self.send_effect_event('setSpectrum')
 
-    effect_driver_path = self.get_driver_path('logo_matrix_effect_spectrum')
-
-    with open(effect_driver_path, 'w') as effect_driver_file:
-        effect_driver_file.write('1')
+    self._write_10('logo_matrix_effect_spectrum', 1)
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoNone')
@@ -62,10 +54,7 @@ def set_logo_none_naga_hex_v2(self):
     # Notify others
     self.send_effect_event('setNone')
 
-    driver_path = self.get_driver_path('logo_matrix_effect_none')
-
-    with open(driver_path, 'w') as driver_file:
-        driver_file.write('1')
+    self._write_10('logo_matrix_effect_none', 1)
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoReactive', in_sig='yyyy')
@@ -87,18 +76,13 @@ def set_logo_reactive_naga_hex_v2(self, red, green, blue, speed):
     """
     self.logger.debug("DBus call set_reactive_effect")
 
-    driver_path = self.get_driver_path('logo_matrix_effect_reactive')
-
     # Notify others
     self.send_effect_event('setReactive', red, green, blue, speed)
 
     if speed not in (1, 2, 3, 4):
         speed = 4
 
-    payload = bytes([speed, red, green, blue])
-
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(payload)
+    self._write_bytes('logo_matrix_effect_reactive', [red, green, blue, speed])
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoBreathRandom')
@@ -111,12 +95,9 @@ def set_logo_breath_random_naga_hex_v2(self):
     # Notify others
     self.send_effect_event('setBreathRandom')
 
-    driver_path = self.get_driver_path('logo_matrix_effect_breath')
-
     payload = b'1'
 
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(payload)
+    self._write_bytes('logo_matrix_effect_breath', [payload])
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoBreathSingle', in_sig='yyy')
@@ -138,12 +119,7 @@ def set_logo_breath_single_naga_hex_v2(self, red, green, blue):
     # Notify others
     self.send_effect_event('setBreathSingle', red, green, blue)
 
-    driver_path = self.get_driver_path('logo_matrix_effect_breath')
-
-    payload = bytes([red, green, blue])
-
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(payload)
+    self._write_bytes('logo_matrix_effect_breath', [red, green, blue])
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoBreathDual', in_sig='yyyyyy')
@@ -174,12 +150,8 @@ def set_logo_breath_dual_naga_hex_v2(self, red1, green1, blue1, red2, green2, bl
     # Notify others
     self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
 
-    driver_path = self.get_driver_path('logo_matrix_effect_breath')
-
-    payload = bytes([red1, green1, blue1, red2, green2, blue2])
-
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(payload)
+    self._write_bytes('logo_matrix_effect_breath',
+                      [red1, green1, blue1, red2, green2, blue2])
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollStatic', in_sig='yyy')
@@ -203,10 +175,7 @@ def set_scroll_static_naga_hex_v2(self, red, green, blue):
 
     rgb_driver_path = self.get_driver_path('scroll_matrix_effect_static')
 
-    payload = bytes([red, green, blue])
-
-    with open(rgb_driver_path, 'wb') as rgb_driver_file:
-        rgb_driver_file.write(payload)
+    self._write_bytes('scroll_matrix_effect_static', [red, green, blue])
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollSpectrum')
@@ -228,10 +197,7 @@ def set_scroll_spectrum_naga_hex_v2(self):
     # Notify others
     self.send_effect_event('setSpectrum')
 
-    effect_driver_path = self.get_driver_path('scroll_matrix_effect_spectrum')
-
-    with open(effect_driver_path, 'w') as effect_driver_file:
-        effect_driver_file.write('1')
+    self._write_10('scroll_matrix_effect_spectrum', 1)
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollNone')
@@ -244,10 +210,7 @@ def set_scroll_none_naga_hex_v2(self):
     # Notify others
     self.send_effect_event('setNone')
 
-    driver_path = self.get_driver_path('scroll_matrix_effect_none')
-
-    with open(driver_path, 'w') as driver_file:
-        driver_file.write('1')
+    self._write_10('scroll_matrix_effect_none', 1)
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollReactive', in_sig='yyyy')
@@ -269,18 +232,14 @@ def set_scroll_reactive_naga_hex_v2(self, red, green, blue, speed):
     """
     self.logger.debug("DBus call set_reactive_effect")
 
-    driver_path = self.get_driver_path('scroll_matrix_effect_reactive')
-
     # Notify others
     self.send_effect_event('setReactive', red, green, blue, speed)
 
     if speed not in (1, 2, 3, 4):
         speed = 4
 
-    payload = bytes([speed, red, green, blue])
-
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(payload)
+    self._write_bytes('scroll_matrix_effect_reactive',
+                      [speed, red, green, blue])
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollBreathRandom')
@@ -297,8 +256,7 @@ def set_scroll_breath_random_naga_hex_v2(self):
 
     payload = b'1'
 
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(payload)
+    self._write_bytes('scroll_matrix_effect_breath', [payload])
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollBreathSingle', in_sig='yyy')
@@ -322,10 +280,7 @@ def set_scroll_breath_single_naga_hex_v2(self, red, green, blue):
 
     driver_path = self.get_driver_path('scroll_matrix_effect_breath')
 
-    payload = bytes([red, green, blue])
-
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(payload)
+    self._write_bytes('scroll_matrix_effect_breath', [red, green, blue])
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollBreathDual', in_sig='yyyyyy')
@@ -356,9 +311,5 @@ def set_scroll_breath_dual_naga_hex_v2(self, red1, green1, blue1, red2, green2, 
     # Notify others
     self.send_effect_event('setBreathDual', red1, green1, blue1, red2, green2, blue2)
 
-    driver_path = self.get_driver_path('scroll_matrix_effect_breath')
-
-    payload = bytes([red1, green1, blue1, red2, green2, blue2])
-
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(payload)
+    self._write_bytes('scroll_matrix_effect_breath',
+                      [red1, green1, blue1, red2, green2, blue2])

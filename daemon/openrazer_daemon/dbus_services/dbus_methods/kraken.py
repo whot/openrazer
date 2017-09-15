@@ -14,10 +14,7 @@ def get_current_effect_kraken(self):
     """
     self.logger.debug("DBus call matrix_current_effect")
 
-    driver_path = self.get_driver_path('matrix_current_effect')
-
-    with open(driver_path, 'r') as driver_file:
-        return int(driver_file.read().strip(), 16)
+    return self._read_int('matrix_current_effect', base=16)
 
 
 @endpoint('razer.device.lighting.kraken', 'getStaticArgs', out_sig='ai')
@@ -30,15 +27,11 @@ def get_static_effect_args_kraken(self):
     """
     self.logger.debug("DBus call get_static_effect_args")
 
-    driver_path = self.get_driver_path('matrix_effect_static')
-
-    with open(driver_path, 'rb') as driver_file:
-        bytestring = driver_file.read()
-        if len(bytestring) != 4:
-            raise ValueError("Response from driver is not valid, should be length 4 got: {0}".format(len(bytestring)))
-        else:
-            return list(bytestring[:3])  # We cut off the intensity value in the end, aint letting people mess with that.
-
+    bytestring = self._read_bytes('matrix_effect_static')
+    if len(bytestring) != 4:
+        raise ValueError("Response from driver is not valid, should be length 4 got: {0}".format(len(bytestring)))
+    else:
+        return list(bytestring[:3])  # We cut off the intensity value in the end, aint letting people mess with that.
 
 @endpoint('razer.device.lighting.kraken', 'getBreathArgs', out_sig='ai')
 def get_breath_effect_args_kraken(self):
@@ -50,24 +43,21 @@ def get_breath_effect_args_kraken(self):
     """
     self.logger.debug("DBus call get_breath_effect_args")
 
-    driver_path = self.get_driver_path('matrix_effect_breath')
+    bytestring = self._read_bytes('matrix_effect_breath')
+    if len(bytestring) % 4 != 0:
+        raise ValueError("Response from driver is not valid, should be length 4 got: {0}".format(len(bytestring)))
+    else:
+        result = []
 
-    with open(driver_path, 'rb') as driver_file:
-        bytestring = driver_file.read()
-        if len(bytestring) % 4 != 0:
-            raise ValueError("Response from driver is not valid, should be length 4 got: {0}".format(len(bytestring)))
-        else:
-            result = []
+        # Result could be 4 bytes (breathing1), 8 bytes (breathing2), 12 bytes (breathing3) and we need to cut of the
+        # intensity value, so i thought it easier to cut it into chunks of 4, append the first 3 values to `result`
+        for chunk in [bytestring[i:i+4] for i in range(0, len(bytestring), 4)]:
+            # Get first 3 values
+            values = list(chunk)[:3]
+            # Add those 3 values into the list
+            result.extend(values)
 
-            # Result could be 4 bytes (breathing1), 8 bytes (breathing2), 12 bytes (breathing3) and we need to cut of the
-            # intensity value, so i thought it easier to cut it into chunks of 4, append the first 3 values to `result`
-            for chunk in [bytestring[i:i+4] for i in range(0, len(bytestring), 4)]:
-                # Get first 3 values
-                values = list(chunk)[:3]
-                # Add those 3 values into the list
-                result.extend(values)
-
-            return result  # We cut off the intensity value in the end, aint letting people mess with that.
+        return result  # We cut off the intensity value in the end, aint letting people mess with that.
 
 
 @endpoint('razer.device.lighting.kraken', 'setCustom', in_sig='ai')
@@ -79,8 +69,6 @@ def set_custom_kraken(self, rgbi):
     :rtype: int
     """
     self.logger.debug("DBus call set custom")
-
-    driver_path = self.get_driver_path('matrix_effect_custom')
 
     if len(rgbi) not in (3, 4):
         raise ValueError("List must be of 3 or 4 bytes")
@@ -97,6 +85,5 @@ def set_custom_kraken(self, rgbi):
         else:
             rgbi_list[index] = item
 
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(bytes(rgbi_list))
+    self._write_bytes('matrix_effect_custom', rgbi_list)
 

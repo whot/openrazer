@@ -13,7 +13,4 @@ def is_mug_present(self):
     """
     self.logger.debug("DBus call is_mug_present")
 
-    driver_path = self.get_driver_path('is_mug_present')
-
-    with open(driver_path, 'r') as driver_file:
-        return int(driver_file.read().strip()) == 1
+    return self._read_10('is_mug_present')

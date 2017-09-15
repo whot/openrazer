@@ -42,10 +42,7 @@ def get_firmware(self):
     """
     self.logger.debug("DBus call get_firmware")
 
-    driver_path = self.get_driver_path('firmware_version')
-
-    with open(driver_path, 'r') as driver_file:
-        return driver_file.read().strip()
+    return self._read_string('firmware_version')
 
 
 @endpoint('razer.device.misc', 'getDeviceName', out_sig='s')
@@ -58,10 +55,7 @@ def get_device_name(self):
     """
     self.logger.debug("DBus call get_device_name")
 
-    driver_path = self.get_driver_path('device_type')
-
-    with open(driver_path, 'r') as driver_file:
-        return driver_file.read().strip()
+    return self._read_string('device_type')
 
 
 # Functions to define a hardware class

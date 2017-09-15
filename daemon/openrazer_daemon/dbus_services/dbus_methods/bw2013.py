@@ -13,11 +13,7 @@ def bw_get_effect(self):
     """
     self.logger.debug("DBus call bw_get_effect")
 
-    driver_path = self.get_driver_path('matrix_effect_pulsate')
-
-    with open(driver_path, 'r') as driver_file:
-        brightness = int(driver_file.read().strip())
-        return brightness
+    return self._read_int('matrix_effect_pulsate')
 
 
 @endpoint('razer.device.lighting.bw2013', 'setPulsate')
@@ -29,8 +25,7 @@ def bw_set_pulsate(self):
 
     driver_path = self.get_driver_path('matrix_effect_pulsate')
 
-    with open(driver_path, 'w') as driver_file:
-        driver_file.write('1')
+    self._write_10('matrix_effect_pulsate', 1)
 
     # Notify others
     self.send_effect_event('setPulsate')
@@ -43,10 +38,7 @@ def bw_set_static(self):
     """
     self.logger.debug("DBus call bw_set_static")
 
-    driver_path = self.get_driver_path('matrix_effect_static')
-
-    with open(driver_path, 'w') as driver_file:
-        driver_file.write('1')
+    self._write_10('matrix_effect_static', 1)
 
     # Notify others
     self.send_effect_event('setStatic')

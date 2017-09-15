@@ -13,6 +13,7 @@ def get_battery(self):
     """
     self.logger.debug("DBus call get_battery")
 
+    # FIXME
     driver_path = self.get_driver_path('charge_level')
 
     with open(driver_path, 'r') as driver_file:
@@ -31,10 +32,7 @@ def is_charging(self):
     """
     self.logger.debug("DBus call is_charging")
 
-    driver_path = self.get_driver_path('charge_status')
-
-    with open(driver_path, 'r') as driver_file:
-        return bool(int(driver_file.read().strip()))
+    return bool(self._read_int('charge_status'))
 
 
 @endpoint('razer.device.power', 'setIdleTime', in_sig='q')
@@ -47,10 +45,7 @@ def set_idle_time(self, idle_time):
     """
     self.logger.debug("DBus call set_idle_time")
 
-    driver_path = self.get_driver_path('device_idle_time')
-
-    with open(driver_path, 'w') as driver_file:
-        driver_file.write(str(idle_time))
+    return self._write_string('device_idle_time', idle_time)
 
 
 @endpoint('razer.device.power', 'setLowBatteryThreshold', in_sig='y')
@@ -63,6 +58,7 @@ def set_low_battery_threshold(self, threshold):
     """
     self.logger.debug("DBus call set_low_battery_threshold")
 
+    # FIXME
     driver_path = self.get_driver_path('charge_low_threshold')
 
     threshold = math.floor((threshold/100) * 255)
@@ -85,10 +81,7 @@ def set_charge_effect(self, charge_effect):
     """
     self.logger.debug("DBus call set_charge_effect")
 
-    driver_path = self.get_driver_path('charge_effect')
-
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(bytes([charge_effect]))
+    self._write_bytes('charge_effect', [charge_effect])
 
 
 @endpoint('razer.device.lighting.power', 'setChargeColour', in_sig='yyy')
@@ -107,12 +100,7 @@ def set_charge_colour(self, red, green, blue):
     """
     self.logger.debug("DBus call set_charge_colour")
 
-    driver_path = self.get_driver_path('charge_colour')
-
-    payload = bytes([red, green, blue])
-
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(payload)
+    self._write_bytes('charge_colour', [red, green, blue])
 
 
 @endpoint('razer.device.dpi', 'setDPI', in_sig='qq')
@@ -127,12 +115,9 @@ def set_dpi_xy(self, dpi_x, dpi_y):
     """
     self.logger.debug("DBus call set_dpi_both")
 
-    driver_path = self.get_driver_path('dpi')
-
     dpi_bytes = struct.pack('>HH', dpi_x, dpi_y)
 
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(dpi_bytes)
+    self._write_bytes('dpi', dpi_bytes)
 
 
 @endpoint('razer.device.dpi', 'getDPI', out_sig='ai')
@@ -145,11 +130,7 @@ def get_dpi_xy(self):
     """
     self.logger.debug("DBus call get_dpi_both")
 
-    driver_path = self.get_driver_path('dpi')
-
-    with open(driver_path, 'r') as driver_file:
-        result = driver_file.read()
-        dpi_x, dpi_y = [int(dpi) for dpi in result.strip().split(':')]
+    dpi_x, dpi_y = [int(dpi) for dpi in self._read_string('dpi')]
 
     return [dpi_x, dpi_y]
 
@@ -177,10 +158,7 @@ def set_poll_rate(self, rate):
     self.logger.debug("DBus call set_poll_rate")
 
     if rate in (1000, 500, 125):
-        driver_path = self.get_driver_path('poll_rate')
-
-        with open(driver_path, 'w') as driver_file:
-            driver_file.write(str(rate))
+        self._write_int('poll_rate', rate)
     else:
         self.logger.error("Poll rate %d is invalid", rate)
 
@@ -195,12 +173,6 @@ def get_poll_rate(self):
     """
     self.logger.debug("DBus call get_poll_rate")
 
-    driver_path = self.get_driver_path('poll_rate')
-
-    with open(driver_path, 'r') as driver_file:
-        result = driver_file.read()
-        result = int(result.strip())
-
-    return result
+    return self._read_int('poll_rate')
 
 

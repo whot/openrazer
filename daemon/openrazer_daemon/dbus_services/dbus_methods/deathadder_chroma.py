@@ -11,11 +11,7 @@ def get_backlight_active(self):
     """
     self.logger.debug("DBus call get_backlight_active")
 
-    driver_path = self.get_driver_path('backlight_led_state')
-
-    with open(driver_path, 'r') as driver_file:
-        active = int(driver_file.read().strip())
-        return active == 1
+    return self._read_10('backlight_led_state')
 
 
 @endpoint('razer.device.lighting.backlight', 'setBacklightActive', in_sig='b')
@@ -28,13 +24,7 @@ def set_backlight_active(self, active):
     """
     self.logger.debug("DBus call set_backlight_active")
 
-    driver_path = self.get_driver_path('backlight_led_state')
-
-    with open(driver_path, 'w') as driver_file:
-        if active:
-            driver_file.write('1')
-        else:
-            driver_file.write('0')
+    self._write_10('backlight_led_state', active)
 
 
 @endpoint('razer.device.lighting.logo', 'getLogoActive', out_sig='b')
@@ -47,11 +37,7 @@ def get_logo_active(self):
     """
     self.logger.debug("DBus call get_logo_active")
 
-    driver_path = self.get_driver_path('logo_led_state')
-
-    with open(driver_path, 'r') as driver_file:
-        active = int(driver_file.read().strip())
-        return active == 1
+    return self._read_10('logo_led_state')
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoActive', in_sig='b')
@@ -64,13 +50,7 @@ def set_logo_active(self, active):
     """
     self.logger.debug("DBus call set_logo_active")
 
-    driver_path = self.get_driver_path('logo_led_state')
-
-    with open(driver_path, 'w') as driver_file:
-        if active:
-            driver_file.write('1')
-        else:
-            driver_file.write('0')
+    self._write_10('logo_led_state', active)
 
 
 @endpoint('razer.device.lighting.logo', 'getLogoEffect', out_sig='y')
@@ -83,11 +63,7 @@ def get_logo_effect(self):
     """
     self.logger.debug("DBus call get_logo_effect")
 
-    driver_path = self.get_driver_path('logo_led_effect')
-
-    with open(driver_path, 'r') as driver_file:
-        effect = int(driver_file.read().strip())
-        return effect
+    return self._read_int('logo_led_effect')
 
 
 @endpoint('razer.device.lighting.logo', 'getLogoBrightness', out_sig='d')
@@ -100,13 +76,7 @@ def get_logo_brightness(self):
     """
     self.logger.debug("DBus call get_logo_brightness")
 
-    driver_path = self.get_driver_path('logo_led_brightness')
-
-    with open(driver_path, 'r') as driver_file:
-        brightness = round(float(driver_file.read()) * (100.0/255.0), 2)
-
-        return brightness
-
+    return self._read_percent('logo_led_brightness', maxval=255)
 
 @endpoint('razer.device.lighting.logo', 'setLogoBrightness', in_sig='d')
 def set_logo_brightness(self, brightness):
@@ -118,18 +88,8 @@ def set_logo_brightness(self, brightness):
     """
     self.logger.debug("DBus call set_logo_brightness")
 
-    driver_path = self.get_driver_path('logo_led_brightness')
-
     self.cached_values['brightness'] = brightness
-
-    brightness = int(round(brightness * (255.0/100.0)))
-    if brightness > 255:
-        brightness = 255
-    elif brightness < 0:
-        brightness = 0
-
-    with open(driver_path, 'w') as driver_file:
-        driver_file.write(str(brightness))
+    brightness = self._write_percent('logo_led_brightness', brightness, maxval=255)
 
     # Notify others
     self.send_effect_event('setBrightness', brightness)
@@ -154,15 +114,8 @@ def set_logo_static(self, red, green, blue):
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
 
-    rgb_driver_path = self.get_driver_path('logo_led_rgb')
-    effect_driver_path = self.get_driver_path('logo_led_effect')
-
-    payload = bytes([red, green, blue])
-
-    with open(rgb_driver_path, 'wb') as rgb_driver_file, open(effect_driver_path, 'w') as effect_driver_file:
-        rgb_driver_file.write(payload)
-        effect_driver_file.write('0')
-
+    self._write_bytes('logo_led_rgb', [red, green, blue])
+    self._write_int('logo_led_effect', 0)
 
 @endpoint('razer.device.lighting.logo', 'setLogoBlinking', in_sig='yyy')
 def set_logo_blinking(self, red, green, blue):
@@ -183,14 +136,8 @@ def set_logo_blinking(self, red, green, blue):
     # Notify others
     self.send_effect_event('setLogoBlinking', red, green, blue)
 
-    rgb_driver_path = self.get_driver_path('logo_led_rgb')
-    effect_driver_path = self.get_driver_path('logo_led_effect')
-
-    payload = bytes([red, green, blue])
-
-    with open(rgb_driver_path, 'wb') as rgb_driver_file, open(effect_driver_path, 'w') as effect_driver_file:
-        rgb_driver_file.write(payload)
-        effect_driver_file.write('1')
+    self._write_bytes('logo_led_rgb', [red, green, blue])
+    self._write_int('logo_led_effect', 1)
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoPulsate', in_sig='yyy')
@@ -212,14 +159,8 @@ def set_logo_pulsate(self, red, green, blue):
     # Notify others
     self.send_effect_event('setPulsate', red, green, blue)
 
-    rgb_driver_path = self.get_driver_path('logo_led_rgb')
-    effect_driver_path = self.get_driver_path('logo_led_effect')
-
-    payload = bytes([red, green, blue])
-
-    with open(rgb_driver_path, 'wb') as rgb_driver_file, open(effect_driver_path, 'w') as effect_driver_file:
-        rgb_driver_file.write(payload)
-        effect_driver_file.write('2')
+    self._write_bytes('logo_led_rgb', [red, green, blue])
+    self._write_int('logo_led_effect', 2)
 
 
 @endpoint('razer.device.lighting.logo', 'setLogoSpectrum')
@@ -241,10 +182,7 @@ def set_logo_spectrum(self):
     # Notify others
     self.send_effect_event('setSpectrum')
 
-    effect_driver_path = self.get_driver_path('logo_led_effect')
-
-    with open(effect_driver_path, 'w') as effect_driver_file:
-        effect_driver_file.write('4')
+    self._write_int('logo_led_effect', 4)
 
 
 @endpoint('razer.device.lighting.scroll', 'getScrollActive', out_sig='b')
@@ -257,12 +195,7 @@ def get_scroll_active(self):
     """
     self.logger.debug("DBus call get_scroll_active")
 
-    driver_path = self.get_driver_path('scroll_led_state')
-
-    with open(driver_path, 'r') as driver_file:
-        active = int(driver_file.read().strip())
-        return active == 1
-
+    return self._read_10('scroll_led_state')
 
 @endpoint('razer.device.lighting.scroll', 'setScrollActive', in_sig='b')
 def set_scroll_active(self, active):
@@ -274,13 +207,7 @@ def set_scroll_active(self, active):
     """
     self.logger.debug("DBus call set_scroll_active")
 
-    driver_path = self.get_driver_path('scroll_led_state')
-
-    with open(driver_path, 'w') as driver_file:
-        if active:
-            driver_file.write('1')
-        else:
-            driver_file.write('0')
+    self._write_10('scroll_led_state', active)
 
 
 @endpoint('razer.device.lighting.scroll', 'getScrollEffect', out_sig='y')
@@ -293,11 +220,7 @@ def get_scroll_effect(self):
     """
     self.logger.debug("DBus call get_scroll_effect")
 
-    driver_path = self.get_driver_path('scroll_led_effect')
-
-    with open(driver_path, 'r') as driver_file:
-        effect = int(driver_file.read().strip())
-        return effect
+    return self._read_int('scroll_led_effect')
 
 
 @endpoint('razer.device.lighting.scroll', 'getScrollBrightness', out_sig='d')
@@ -310,12 +233,7 @@ def get_scroll_brightness(self):
     """
     self.logger.debug("DBus call get_scroll_brightness")
 
-    driver_path = self.get_driver_path('scroll_led_brightness')
-
-    with open(driver_path, 'r') as driver_file:
-        brightness = round(float(driver_file.read()) * (100.0/255.0), 2)
-
-        return brightness
+    return self._read_percent('scroll_led_brightness', maxval=255)
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollBrightness', in_sig='d')
@@ -328,18 +246,8 @@ def set_scroll_brightness(self, brightness):
     """
     self.logger.debug("DBus call set_scroll_brightness")
 
-    driver_path = self.get_driver_path('scroll_led_brightness')
-
     self.cached_values['brightness'] = brightness
-
-    brightness = int(round(brightness * (255.0/100.0)))
-    if brightness > 255:
-        brightness = 255
-    elif brightness < 0:
-        brightness = 0
-
-    with open(driver_path, 'w') as driver_file:
-        driver_file.write(str(brightness))
+    brightness = self._write_percent('scroll_led_brightness', brightness, maxval=255)
 
     # Notify others
     self.send_effect_event('setBrightness', brightness)
@@ -364,14 +272,8 @@ def set_scroll_static(self, red, green, blue):
     # Notify others
     self.send_effect_event('setStatic', red, green, blue)
 
-    rgb_driver_path = self.get_driver_path('scroll_led_rgb')
-    effect_driver_path = self.get_driver_path('scroll_led_effect')
-
-    payload = bytes([red, green, blue])
-
-    with open(rgb_driver_path, 'wb') as rgb_driver_file, open(effect_driver_path, 'w') as effect_driver_file:
-        rgb_driver_file.write(payload)
-        effect_driver_file.write('0')
+    self._write_bytes('scroll_led_rgb', [red, green, blue])
+    self._write_int('scroll_led_effect', 0)
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollBlinking', in_sig='yyy')
@@ -393,14 +295,8 @@ def set_scroll_blinking(self, red, green, blue):
     # Notify others
     self.send_effect_event('setPulsate', red, green, blue)
 
-    rgb_driver_path = self.get_driver_path('scroll_led_rgb')
-    effect_driver_path = self.get_driver_path('scroll_led_effect')
-
-    payload = bytes([red, green, blue])
-
-    with open(rgb_driver_path, 'wb') as rgb_driver_file, open(effect_driver_path, 'w') as effect_driver_file:
-        rgb_driver_file.write(payload)
-        effect_driver_file.write('1')
+    self._write_bytes('scroll_led_rgb', [red, green, blue])
+    self._write_int('scroll_led_effect', 1)
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollPulsate', in_sig='yyy')
@@ -422,14 +318,8 @@ def set_scroll_pulsate(self, red, green, blue):
     # Notify others
     self.send_effect_event('setPulsate', red, green, blue)
 
-    rgb_driver_path = self.get_driver_path('scroll_led_rgb')
-    effect_driver_path = self.get_driver_path('scroll_led_effect')
-
-    payload = bytes([red, green, blue])
-
-    with open(rgb_driver_path, 'wb') as rgb_driver_file, open(effect_driver_path, 'w') as effect_driver_file:
-        rgb_driver_file.write(payload)
-        effect_driver_file.write('2')
+    self._write_bytes('scroll_led_rgb', [red, green, blue])
+    self._write_int('scroll_led_effect', 2)
 
 
 @endpoint('razer.device.lighting.scroll', 'setScrollSpectrum')
@@ -451,7 +341,5 @@ def set_scroll_spectrum(self):
     # Notify others
     self.send_effect_event('setSpectrum')
 
-    effect_driver_path = self.get_driver_path('scroll_led_effect')
+    self._write_int('scroll_led_effect', 4)
 
-    with open(effect_driver_path, 'w') as effect_driver_file:
-        effect_driver_file.write('4')

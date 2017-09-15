@@ -16,8 +16,6 @@ def set_dpi_xy_byte(self, dpi_x, dpi_y):
     """
     self.logger.debug("DBus call set_dpi_both")
 
-    driver_path = self.get_driver_path('dpi')
-
     if dpi_x > 6750:
         dpi_x = 6750
     elif dpi_x < 100:
@@ -32,8 +30,7 @@ def set_dpi_xy_byte(self, dpi_x, dpi_y):
 
     dpi_bytes = struct.pack('>BB', dpi_x_scaled, dpi_y_scaled)
 
-    with open(driver_path, 'wb') as driver_file:
-        driver_file.write(dpi_bytes)
+    self._write_bytes('dpi', dpi_bytes)
 
 
 @endpoint('razer.device.dpi', 'getDPI', out_sig='ai')
@@ -48,9 +45,7 @@ def get_dpi_xy_byte(self):
 
     driver_path = self.get_driver_path('dpi')
 
-    with open(driver_path, 'r') as driver_file:
-        result = driver_file.read()
-        dpi_x, dpi_y = [int(dpi) for dpi in result.strip().split(':')]
+    dpi_x, dpi_y = [int(dpi) for dpi in self._read_string('dpi')]
 
     dpi_x = int(round(dpi_x / 255 * 6750, 2))
     dpi_y = int(round(dpi_y / 255 * 6750, 2))

@@ -13,10 +13,7 @@ def tartarus_get_profile_led_red(self):
     """
     self.logger.debug("DBus call tartarus_profile_led_red")
 
-    driver_path = self.get_driver_path('profile_led_red')
-
-    with open(driver_path, 'r') as driver_file:
-        return driver_file.read().strip() == '1'
+    return self._read_10('profile_led_red')
 
 
 @endpoint('razer.device.lighting.profile_led', 'setRedLED', in_sig='b')
@@ -29,13 +26,7 @@ def tartarus_set_profile_led_red(self, enable):
     """
     self.logger.debug("DBus call tartarus_set_profile_led_red")
 
-    driver_path = self.get_driver_path('profile_led_red')
-
-    with open(driver_path, 'w') as driver_file:
-        if enable:
-            driver_file.write('1')
-        else:
-            driver_file.write('0')
+    self._write_10('profile_led_red', enable)
 
 
 @endpoint('razer.device.lighting.profile_led', 'getGreenLED', out_sig='b')
@@ -48,10 +39,7 @@ def tartarus_get_profile_led_green(self):
     """
     self.logger.debug("DBus call tartarus_get_profile_led_green")
 
-    driver_path = self.get_driver_path('profile_led_green')
-
-    with open(driver_path, 'r') as driver_file:
-        return driver_file.read().strip() == '1'
+    return self._read_10('profile_led_green')
 
 
 @endpoint('razer.device.lighting.profile_led', 'setGreenLED', in_sig='b')
@@ -64,13 +52,7 @@ def tartarus_set_profile_led_green(self, enable):
     """
     self.logger.debug("DBus call tartarus_set_profile_led_green")
 
-    driver_path = self.get_driver_path('profile_led_green')
-
-    with open(driver_path, 'w') as driver_file:
-        if enable:
-            driver_file.write('1')
-        else:
-            driver_file.write('0')
+    self._write_10('profile_led_green', enable)
 
 
 @endpoint('razer.device.lighting.profile_led', 'getBlueLED', out_sig='b')
@@ -83,10 +65,7 @@ def tartarus_get_profile_led_blue(self):
     """
     self.logger.debug("DBus call tartarus_get_profile_led_blue")
 
-    driver_path = self.get_driver_path('profile_led_blue')
-
-    with open(driver_path, 'r') as driver_file:
-        return driver_file.read().strip() == '1'
+    return self._read_10('profile_led_blue')
 
 
 @endpoint('razer.device.lighting.profile_led', 'setBlueLED', in_sig='b')
@@ -99,13 +78,7 @@ def tartarus_set_profile_led_blue(self, enable):
     """
     self.logger.debug("DBus call tartarus_set_profile_led_blue")
 
-    driver_path = self.get_driver_path('profile_led_blue')
-
-    with open(driver_path, 'w') as driver_file:
-        if enable:
-            driver_file.write('1')
-        else:
-            driver_file.write('0')
+    self._write_10('profile_led_blue', enable)
 
 
 @endpoint('razer.device.macro', 'getModeModifier', out_sig='b')
