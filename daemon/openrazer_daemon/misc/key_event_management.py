@@ -454,7 +454,7 @@ class KeyboardKeyManager(object):
                 # Brightness logic
                 elif key_name == 'BRIGHTNESSDOWN':
                     # Get brightness value
-                    current_brightness = self._parent.method_args.get('brightness', None)
+                    current_brightness = self._parent.cached_values.get('brightness', None)
                     if current_brightness is None:
                         current_brightness = self._parent.getBrightness()
 
@@ -464,10 +464,10 @@ class KeyboardKeyManager(object):
                             current_brightness = 0
 
                         self._parent.setBrightness(current_brightness)
-                        #self._parent.method_args['brightness'] = current_brightness
+                        #self._parent.cached_values['brightness'] = current_brightness
                 elif key_name == 'BRIGHTNESSUP':
                     # Get brightness value
-                    current_brightness = self._parent.method_args.get('brightness', None)
+                    current_brightness = self._parent.cached_values.get('brightness', None)
                     if current_brightness is None:
                         current_brightness = self._parent.getBrightness()
 
@@ -477,7 +477,7 @@ class KeyboardKeyManager(object):
                             current_brightness = 100
 
                         self._parent.setBrightness(current_brightness)
-                        #self._parent.method_args['brightness'] = current_brightness
+                        #self._parent.cached_values['brightness'] = current_brightness
 
                 elif self._recording_macro:
 

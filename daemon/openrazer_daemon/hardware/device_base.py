@@ -88,7 +88,10 @@ class RazerDevice(DBusService):
 
         # Set up methods to suspend and restore device operation
         self.suspend_args = {}
-        self.method_args = {}
+
+        # Cached values of some properties to avoid having to access the
+        # sysfs files
+        self.cached_values = {}
 
         methods = {
             ('razer.device.misc', 'getDriverVersion', openrazer_daemon.dbus_services.dbus_methods.version, None, 's'),

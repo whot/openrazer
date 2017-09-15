@@ -120,7 +120,7 @@ def set_logo_brightness(self, brightness):
 
     driver_path = self.get_driver_path('logo_led_brightness')
 
-    self.method_args['brightness'] = brightness
+    self.cached_values['brightness'] = brightness
 
     brightness = int(round(brightness * (255.0/100.0)))
     if brightness > 255:
@@ -330,7 +330,7 @@ def set_scroll_brightness(self, brightness):
 
     driver_path = self.get_driver_path('scroll_led_brightness')
 
-    self.method_args['brightness'] = brightness
+    self.cached_values['brightness'] = brightness
 
     brightness = int(round(brightness * (255.0/100.0)))
     if brightness > 255:

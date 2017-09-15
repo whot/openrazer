@@ -16,8 +16,8 @@ def version(self):
     self.logger.debug("DBus call version")
 
     #Caching
-    if 'driver_version' in self.method_args:
-        return self.method_args['driver_version']
+    if 'driver_version' in self.cached_values:
+        return self.cached_values['driver_version']
 
     driver_path = self.get_driver_path('version')
 
@@ -28,7 +28,7 @@ def version(self):
         with open(driver_path, 'r') as driver_file:
             driver_version = driver_file.read().strip()
 
-    self.method_args['driver_version'] = driver_version
+    self.cached_values['driver_version'] = driver_version
     return driver_version
 
 
