@@ -413,14 +413,11 @@ class RazerDaemon(DBusService):
                 break
 
             # Wireless devices sometimes dont listen
-            count = 0
-            while count < 3:
-                # Loop to get serial, exit early if it gets one
+            for _ in range(3):
                 device_serial = razer_device.getSerial()
                 if len(device_serial) > 0:
                     break
                 time.sleep(0.1)
-                count += 1
             else:
                 logging.warning("Could not get serial for device {0}. Skipping".format(sys_name))
                 continue
