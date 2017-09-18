@@ -1,7 +1,7 @@
 """
 Core class
 """
-from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend
+from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend, RazerDeviceType
 
 
 class RazerCore(__RazerDeviceBrightnessSuspend):
@@ -12,6 +12,7 @@ class RazerCore(__RazerDeviceBrightnessSuspend):
     USB_PID = 0x0215
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 9]  # 6 Rows, 22 Cols
+    DEVICE_TYPE = RazerDeviceType.CORE
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/gaming-systems/razer-core",
@@ -22,4 +23,4 @@ class RazerCore(__RazerDeviceBrightnessSuspend):
 
     METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_brightness', 'set_brightness', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
                'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
-               'set_custom_effect', 'set_key_row', 'get_device_type_core']
+               'set_custom_effect', 'set_key_row']

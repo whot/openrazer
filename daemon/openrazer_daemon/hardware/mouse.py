@@ -2,7 +2,7 @@
 Mouse class
 """
 import re
-from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend, RazerDevice as __RazerDevice
+from openrazer_daemon.hardware.device_base import RazerDeviceBrightnessSuspend as __RazerDeviceBrightnessSuspend, RazerDevice as __RazerDevice, RazerDeviceType
 from openrazer_daemon.misc.battery_notifier import BatteryManager as _BatteryManager
 # TODO replace with plain import
 from openrazer_daemon.dbus_services.dbus_methods.deathadder_chroma import get_logo_brightness as _da_get_logo_brightness, set_logo_brightness as _da_set_logo_brightness, \
@@ -21,7 +21,8 @@ class RazerMambaChromaWireless(__RazerDeviceBrightnessSuspend):
     USB_PID = 0x0045
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 15]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness', 'get_battery', 'is_charging', 'set_wave_effect',
+    DEVICE_TYPE = RazerDeviceType.MOUSE
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_brightness', 'set_brightness', 'get_battery', 'is_charging', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'set_charge_effect', 'set_charge_colour', 'set_idle_time', 'set_low_battery_threshold', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
@@ -58,7 +59,8 @@ class RazerMambaChromaWired(__RazerDeviceBrightnessSuspend):
     USB_PID = 0x0044
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 15]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness', 'set_wave_effect',
+    DEVICE_TYPE = RazerDeviceType.MOUSE
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_brightness', 'set_brightness', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row', 'max_dpi',
                'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate', 'set_idle_time', 'set_low_battery_threshold', 'get_battery', 'is_charging']
@@ -81,7 +83,8 @@ class RazerMambaChromaTE(__RazerDeviceBrightnessSuspend):
     USB_PID = 0x0046
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 16]  # 1 Row, 16 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness', 'set_wave_effect',
+    DEVICE_TYPE = RazerDeviceType.MOUSE
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_brightness', 'set_brightness', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row', 'max_dpi',
                'get_dpi_xy', 'set_dpi_xy']
@@ -104,7 +107,8 @@ class RazerAbyssus(__RazerDevice):
     USB_PID = 0x0042
     HAS_MATRIX = False
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'set_logo_active', 'get_logo_active']
+    DEVICE_TYPE = RazerDeviceType.MOUSE
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'set_logo_active', 'get_logo_active']
 
     RAZER_URLS = {
         "store": "https://www.razerzone.com/gb-en/store/razer-abyssus",
@@ -131,7 +135,8 @@ class RazerImperator(__RazerDevice):
     USB_PID = 0x002F
     HAS_MATRIX = False
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'set_logo_active', 'get_logo_active', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+    DEVICE_TYPE = RazerDeviceType.MOUSE
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'set_logo_active', 'get_logo_active', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
                'get_poll_rate', 'set_poll_rate', 'set_scroll_active', 'get_scroll_active']
 
     RAZER_URLS = {
@@ -158,7 +163,8 @@ class RazerOuroboros(__RazerDevice):
     USB_PID = 0x0032
     HAS_MATRIX = False
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
+    DEVICE_TYPE = RazerDeviceType.MOUSE
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy',
                'get_poll_rate', 'set_poll_rate', 'set_scroll_active', 'get_scroll_active', 'get_scroll_brightness', 'set_scroll_brightness',
                'get_battery', 'is_charging', 'set_idle_time', 'set_low_battery_threshold']
 
@@ -206,7 +212,8 @@ class RazerOrochi2013(__RazerDevice):
     USB_PID = 0x0039
     HAS_MATRIX = False
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_dpi_xy', 'set_dpi_xy',
+    DEVICE_TYPE = RazerDeviceType.MOUSE
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_dpi_xy', 'set_dpi_xy',
                'get_poll_rate', 'set_poll_rate', 'set_scroll_active', 'get_scroll_active', 'max_dpi']
 
     DPI_MAX = 6400
@@ -236,7 +243,8 @@ class RazerOrochiWired(__RazerDeviceBrightnessSuspend):
     USB_PID = 0x0048
     HAS_MATRIX = False
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness',
+    DEVICE_TYPE = RazerDeviceType.MOUSE
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_brightness', 'set_brightness',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_idle_time', 'set_low_battery_threshold', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'set_scroll_active', 'get_scroll_active']
 
@@ -258,8 +266,8 @@ class RazerDeathadderChroma(__RazerDeviceBrightnessSuspend):
     USB_PID = 0x0043
     HAS_MATRIX = False
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse',
-               'set_logo_active', 'get_logo_active', 'get_logo_effect', 'get_logo_brightness', 'set_logo_brightness', 'set_logo_static', 'set_logo_pulsate', 'set_logo_blinking', 'set_logo_spectrum',
+    DEVICE_TYPE = RazerDeviceType.MOUSE
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'set_logo_active', 'get_logo_active', 'get_logo_effect', 'get_logo_brightness', 'set_logo_brightness', 'set_logo_static', 'set_logo_pulsate', 'set_logo_blinking', 'set_logo_spectrum',
                'set_scroll_active', 'get_scroll_active', 'get_scroll_effect', 'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_static', 'set_scroll_pulsate', 'set_scroll_blinking', 'set_scroll_spectrum',
                'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']
 
@@ -322,7 +330,8 @@ class RazerNagaHexV2(__RazerDeviceBrightnessSuspend):
     HAS_MATRIX = True
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [1, 3]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
+    DEVICE_TYPE = RazerDeviceType.MOUSE
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness', 'get_brightness', 'set_brightness',
                # Thumbgrid is technically backlight ID
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect','set_breath_single_effect', 'set_breath_dual_effect',
@@ -401,7 +410,8 @@ class RazerNagaChroma(__RazerDeviceBrightnessSuspend):
     HAS_MATRIX = True
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [1, 3]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
+    DEVICE_TYPE = RazerDeviceType.MOUSE
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
                # Thumbgrid is technically backlight ID
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect','set_breath_single_effect', 'set_breath_dual_effect',
@@ -446,7 +456,8 @@ class RazerNagaHex(__RazerDevice):
     HAS_MATRIX = False
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate',
+    DEVICE_TYPE = RazerDeviceType.MOUSE
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate',
                'get_logo_active', 'set_logo_active', 'get_scroll_active', 'set_scroll_active']
 
     RAZER_URLS = {
@@ -499,7 +510,8 @@ class RazerNagaHexRed(__RazerDevice):
     HAS_MATRIX = False
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate',
+    DEVICE_TYPE = RazerDeviceType.MOUSE
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate',
                'get_logo_active', 'set_logo_active', 'get_scroll_active', 'set_scroll_active']
 
     RAZER_URLS = {
@@ -552,7 +564,8 @@ class RazerTaipan(__RazerDevice):
     HAS_MATRIX = False
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
+    DEVICE_TYPE = RazerDeviceType.MOUSE
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'get_logo_active', 'set_logo_active', 'get_scroll_active', 'set_scroll_active']
 
     RAZER_URLS = {
@@ -607,7 +620,8 @@ class RazerDeathadderElite(__RazerDeviceBrightnessSuspend):
     USB_PID = 0x005c
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 2]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
+    DEVICE_TYPE = RazerDeviceType.MOUSE
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'get_logo_brightness', 'set_logo_brightness', 'get_scroll_brightness', 'set_scroll_brightness',
                # Logo
                'set_logo_static_naga_hex_v2', 'set_logo_spectrum_naga_hex_v2', 'set_logo_none_naga_hex_v2', 'set_logo_reactive_naga_hex_v2', 'set_logo_breath_random_naga_hex_v2', 'set_logo_breath_single_naga_hex_v2', 'set_logo_breath_dual_naga_hex_v2',
@@ -663,7 +677,8 @@ class RazerDiamondbackChroma(__RazerDeviceBrightnessSuspend):
     USB_PID = 0x004C
     HAS_MATRIX = True
     MATRIX_DIMS = [1, 19]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_brightness', 'set_brightness', 'set_wave_effect',
+    DEVICE_TYPE = RazerDeviceType.MOUSE
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_brightness', 'set_brightness', 'set_wave_effect',
                'set_static_effect', 'set_spectrum_effect', 'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect',
                'set_breath_single_effect', 'set_breath_dual_effect', 'set_custom_effect', 'set_key_row',
                'max_dpi', 'get_dpi_xy', 'set_dpi_xy']
@@ -686,7 +701,8 @@ class RazerMamba2012Wireless(__RazerDeviceBrightnessSuspend):
     USB_PID = 0x0025
     HAS_MATRIX = False
     MATRIX_DIMS = [-1, -1]
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'get_battery', 'is_charging',
+    DEVICE_TYPE = RazerDeviceType.MOUSE
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_battery', 'is_charging',
                'set_idle_time', 'set_low_battery_threshold', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'set_scroll_active', 'get_scroll_active', 'get_scroll_effect', 'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_static', 'set_scroll_spectrum']
 
@@ -722,7 +738,8 @@ class RazerMamba2012Wired(__RazerDeviceBrightnessSuspend):
     USB_PID = 0x0024
     HAS_MATRIX = False
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse',
+    DEVICE_TYPE = RazerDeviceType.MOUSE
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name',
                'set_idle_time', 'set_low_battery_threshold', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'set_scroll_active', 'get_scroll_active', 'get_scroll_effect', 'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_static', 'set_scroll_spectrum',
                'get_battery', 'is_charging']
@@ -748,7 +765,8 @@ class RazerNaga2014(__RazerDevice):
     HAS_MATRIX = False
     DEDICATED_MACRO_KEYS = True
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
+    DEVICE_TYPE = RazerDeviceType.MOUSE
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate',
                'get_logo_active', 'set_logo_active', 'get_scroll_active', 'set_scroll_active', 'set_backlight_active', 'get_backlight_active']
 
     RAZER_URLS = {
@@ -803,7 +821,8 @@ class RazerOrochi2011(__RazerDeviceBrightnessSuspend):
 
     HAS_MATRIX = False
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse', 'set_logo_active', 'get_logo_active', 'set_scroll_active', 'get_scroll_active',
+    DEVICE_TYPE = RazerDeviceType.MOUSE
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'set_logo_active', 'get_logo_active', 'set_scroll_active', 'get_scroll_active',
                'max_dpi', 'get_dpi_xy_byte', 'set_dpi_xy_byte', 'get_poll_rate', 'set_poll_rate']
 
     RAZER_URLS = {
@@ -853,7 +872,8 @@ class RazerAbyssusV2(__RazerDeviceBrightnessSuspend):
     USB_PID = 0x005B
     HAS_MATRIX = False
     MATRIX_DIMS = [-1, -1]  # 1 Row, 15 Cols
-    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'get_device_type_mouse',
+    DEVICE_TYPE = RazerDeviceType.MOUSE
+    METHODS = ['get_firmware', 'get_matrix_dims', 'has_matrix', 'get_device_name', 'set_logo_active',
                'set_logo_active', 'get_logo_active', 'get_logo_effect', 'get_logo_brightness', 'set_logo_brightness', 'set_logo_static', 'set_logo_pulsate', 'set_logo_blinking', 'set_logo_spectrum',
                'set_scroll_active', 'get_scroll_active', 'get_scroll_effect', 'get_scroll_brightness', 'set_scroll_brightness', 'set_scroll_static', 'set_scroll_pulsate', 'set_scroll_blinking', 'set_scroll_spectrum',
                'max_dpi', 'get_dpi_xy', 'set_dpi_xy', 'get_poll_rate', 'set_poll_rate']

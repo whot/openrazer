@@ -3,7 +3,7 @@ Headsets class
 """
 import re
 
-from openrazer_daemon.hardware.device_base import RazerDevice as __RazerDevice
+from openrazer_daemon.hardware.device_base import RazerDevice as __RazerDevice, RazerDeviceType
 from openrazer_daemon.dbus_services.dbus_methods import kraken as _dbus_kraken, chroma_keyboard as _dbus_chroma
 
 
@@ -18,7 +18,8 @@ class RazerKrakenClassic(__RazerDevice):
     HAS_MATRIX = False
     DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [-1, -1]
-    METHODS = ['get_firmware', 'get_device_name', 'get_device_type_headset', 'has_matrix', 'get_matrix_dims',
+    DEVICE_TYPE = RazerDeviceType.HEADSET
+    METHODS = ['get_firmware', 'get_device_name', 'has_matrix', 'get_matrix_dims',
                'set_static_effect', 'set_none_effect', 'get_current_effect_kraken']
 
     RAZER_URLS = {
@@ -92,7 +93,8 @@ class RazerKraken(__RazerDevice):
     HAS_MATRIX = False
     DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [-1, -1]
-    METHODS = ['get_firmware', 'get_device_name', 'get_device_type_headset', 'has_matrix', 'get_matrix_dims',
+    DEVICE_TYPE = RazerDeviceType.HEADSET
+    METHODS = ['get_firmware', 'get_device_name', 'has_matrix', 'get_matrix_dims',
                'set_static_effect', 'set_spectrum_effect', 'set_none_effect', 'set_breath_single_effect',
                'get_current_effect_kraken', 'get_static_effect_args_kraken', 'get_breath_effect_args_kraken', 'set_custom_kraken']
 
@@ -176,7 +178,8 @@ class RazerKrakenV2(__RazerDevice):
     HAS_MATRIX = False
     DEDICATED_MACRO_KEYS = False
     MATRIX_DIMS = [-1, -1]
-    METHODS = ['get_firmware', 'get_device_name', 'get_device_type_headset', 'has_matrix', 'get_matrix_dims',
+    DEVICE_TYPE = RazerDeviceType.HEADSET
+    METHODS = ['get_firmware', 'get_device_name', 'has_matrix', 'get_matrix_dims',
                'set_static_effect', 'set_spectrum_effect', 'set_none_effect', 'set_breath_single_effect', 'set_breath_dual_effect', 'set_breath_triple_effect',
                'get_current_effect_kraken', 'get_static_effect_args_kraken', 'get_breath_effect_args_kraken', 'set_custom_kraken']
 

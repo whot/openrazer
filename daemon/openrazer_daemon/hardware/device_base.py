@@ -8,6 +8,7 @@ import logging
 import time
 import json
 import random
+from enum import Enum
 
 import dbus
 
@@ -82,6 +83,18 @@ def cachable_input_value(attr="cache_attribute_not_set"):
     return cachable_decorator
 
 
+class RazerDeviceType(Enum):
+    MOUSE = 'mouse'
+    KEYBOARD = 'keyboard'
+    FIREFLY = 'firefly'
+    TARTARUS = 'tartarus'
+    ORBWEAVER = 'orbweaver'
+    CORE = 'core'
+    KEYPAD = 'keypad'
+    HEADSET = 'headset'
+    MUG = 'mug'
+
+
 # pylint: disable=too-many-instance-attributes
 class RazerDevice(DBusService):
     """
@@ -92,6 +105,7 @@ class RazerDevice(DBusService):
     BUS_PATH = 'org.razer'
     OBJECT_PATH = '/org/razer/device/'
     METHODS = []
+    DEVICE_TYPE = None # one of RazerDeviceType
 
     EVENT_FILE_REGEX = None
 
@@ -185,6 +199,12 @@ class RazerDevice(DBusService):
         payload.extend(args)
 
         self.notify_observers(tuple(payload))
+
+    @dbus.service.method('razer.device.misc', out_signature='s')
+    def getDeviceType(self):
+        if self.DEVICE_TYPE is None:
+            raise NotImplementedError('BUG: Class {} does not have DEVICE_TYPE set'.format(self.__class__))
+        return self.DEVICE_TYPE.value
 
     @dbus.service.method('razer.device.misc', out_signature='b')
     def hasDedicatedMacroKeys(self):
