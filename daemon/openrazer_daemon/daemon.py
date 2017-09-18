@@ -378,45 +378,47 @@ class RazerDaemon(DBusService):
                 continue
 
             for device_class in self._device_classes:
-                if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
-                    self.logger.info('Found device.%d: %s', device_number, sys_name)
+                if not device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
+                    continue
 
-                    # TODO add testdir support
-                    # Basically find the other usb interfaces
-                    device_match = sys_name.split('.')[0]
-                    additional_interfaces = []
-                    if not test_mode:
-                        for alt_device in device_list:
-                            if device_match in alt_device.sys_name and alt_device.sys_name != sys_name:
-                                additional_interfaces.append(alt_device.sys_path)
+                self.logger.info('Found device.%d: %s', device_number, sys_name)
 
-                    # Checking permissions
-                    test_file = os.path.join(sys_path, 'device_type')
-                    file_group_id = os.stat(test_file).st_gid
-                    file_group_name = grp.getgrgid(file_group_id)[0]
+                # TODO add testdir support
+                # Basically find the other usb interfaces
+                device_match = sys_name.split('.')[0]
+                additional_interfaces = []
+                if not test_mode:
+                    for alt_device in device_list:
+                        if device_match in alt_device.sys_name and alt_device.sys_name != sys_name:
+                            additional_interfaces.append(alt_device.sys_path)
 
-                    if os.getgid() != file_group_id and file_group_name != 'plugdev':
-                        self.logger.critical("Could not access {0}/device_type, file is not owned by plugdev".format(sys_path))
+                # Checking permissions
+                test_file = os.path.join(sys_path, 'device_type')
+                file_group_id = os.stat(test_file).st_gid
+                file_group_name = grp.getgrgid(file_group_id)[0]
+
+                if os.getgid() != file_group_id and file_group_name != 'plugdev':
+                    self.logger.critical("Could not access {0}/device_type, file is not owned by plugdev".format(sys_path))
+                    break
+
+                razer_device = device_class(sys_path, device_number, self._config, testing=self._test_dir is not None, additional_interfaces=sorted(additional_interfaces))
+
+                # Wireless devices sometimes dont listen
+                count = 0
+                while count < 3:
+                    # Loop to get serial, exit early if it gets one
+                    device_serial = razer_device.getSerial()
+                    if len(device_serial) > 0:
                         break
+                    time.sleep(0.1)
+                    count += 1
+                else:
+                    logging.warning("Could not get serial for device {0}. Skipping".format(sys_name))
+                    continue
 
-                    razer_device = device_class(sys_path, device_number, self._config, testing=self._test_dir is not None, additional_interfaces=sorted(additional_interfaces))
+                self._razer_devices.add(sys_name, device_serial, razer_device)
 
-                    # Wireless devices sometimes dont listen
-                    count = 0
-                    while count < 3:
-                        # Loop to get serial, exit early if it gets one
-                        device_serial = razer_device.getSerial()
-                        if len(device_serial) > 0:
-                            break
-                        time.sleep(0.1)
-                        count += 1
-                    else:
-                        logging.warning("Could not get serial for device {0}. Skipping".format(sys_name))
-                        continue
-
-                    self._razer_devices.add(sys_name, device_serial, razer_device)
-
-                    device_number += 1
+                device_number += 1
 
     def _add_device(self, device):
         """
@@ -433,23 +435,24 @@ class RazerDaemon(DBusService):
 
         device_number = len(self._razer_devices)
         for device_class in self._device_classes:
+            if not device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
+                continue
 
-            if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
-                self.logger.info('Found valid device.%d: %s', device_number, sys_name)
-                razer_device = device_class(sys_path, device_number, self._config, testing=self._test_dir is not None)
+            self.logger.info('Found valid device.%d: %s', device_number, sys_name)
+            razer_device = device_class(sys_path, device_number, self._config, testing=self._test_dir is not None)
 
-                # Its a udev event so currently the device hasn't been chmodded yet
-                time.sleep(0.2)
+            # Its a udev event so currently the device hasn't been chmodded yet
+            time.sleep(0.2)
 
-                # Wireless devices sometimes dont listen
-                device_serial = razer_device.getSerial()
+            # Wireless devices sometimes dont listen
+            device_serial = razer_device.getSerial()
 
-                if len(device_serial) > 0:
-                    # Add Device
-                    self._razer_devices.add(sys_name, device_serial, razer_device)
-                    self.device_added()
-                else:
-                    logging.warning("Could not get serial for device {0}. Skipping".format(sys_name))
+            if len(device_serial) > 0:
+                # Add Device
+                self._razer_devices.add(sys_name, device_serial, razer_device)
+                self.device_added()
+            else:
+                logging.warning("Could not get serial for device {0}. Skipping".format(sys_name))
 
     def _remove_device(self, device):
         """
