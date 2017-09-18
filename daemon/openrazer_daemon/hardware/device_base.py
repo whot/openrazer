@@ -19,11 +19,14 @@ def cachable_return_value(attr="cache_attribute_not_set"):
     """
     A decorator for functions returning a cachable value. The first time
     the function is invoked, this decorator calls through to the actual
-    function. Any return value is stored in self.attr, where self is the
-    first argument to the function. Future calls will return that cached
-    value.
+    function. Any return value is stored in self.attr[identifier], where
+    self is the first argument to the function and identifier is the second
+    argument. Future calls will return that cached value.
 
-    Caching only happens with the keywoard argument use_cache=True
+    The function must be of type:
+        def foo(self, identifier, ...)
+
+    Caching only happens with the keyword argument use_cache=True
     """
     def cachable_decorator(func):
         def func_wrapper(*args, **kwargs):
@@ -42,6 +45,39 @@ def cachable_return_value(attr="cache_attribute_not_set"):
             if val is not None and use_cache:
                 self.cached_values[filename] = val
             return val
+        return func_wrapper
+    return cachable_decorator
+
+def cachable_input_value(attr="cache_attribute_not_set"):
+    """
+    A decorator for functions writing a cachable value. If the function
+    succeeds, the input value is written into self.attr[identifier], where
+    self is the first argument to the function and identifier is the second
+    argument. The input value must be the third argument.
+
+    The function must be of type:
+        def foo(self, identifier, value, ...)
+
+    Caching only happens with the keywoard argument use_cache=True
+    """
+    def cachable_decorator(func):
+        def func_wrapper(*args, **kwargs):
+            val = func(*args, **kwargs)
+
+            use_cache = False
+            self = args[0]
+            filename = args[1]
+            value = args[2]
+            try:
+                use_cache = kwargs['use_cache']
+                if use_cache:
+                    cache = getattr(self, attr)
+                    cache[filename] = value
+            except KeyError:
+                pass
+
+            if val is not None:
+                return val
         return func_wrapper
     return cachable_decorator
 
@@ -120,7 +156,8 @@ class RazerDevice(DBusService):
         self.suspend_args = {}
 
         # Cached values of some properties to avoid having to access the
-        # sysfs files
+        # sysfs files. This is handled via the @cachable_return_value
+        # decorator
         self.cached_values = {}
 
         methods = {
@@ -489,6 +526,10 @@ class RazerDevice(DBusService):
     @cachable_return_value(attr='cached_values')
     def _read_percent(self, filename, maxval=None, use_cache=False):
         """
+        Note: use_cache is True, the cached value is the scaled value as
+        previously returned to the user. In other words, calling this
+        function with varying maxval values is a bug.
+
         :param filename: a driver file in the sysfs tree
         :param maxval: if set, the returned value is normalized for the range
                        0 to maxval
@@ -523,7 +564,8 @@ class RazerDevice(DBusService):
             return f.read().strip()
 
 
-    def _write_10(self, filename, arg):
+    @cachable_input_value(attr='cached_values')
+    def _write_10(self, filename, arg, use_cache=False):
         """
         :param filename: a driver file in the sysfs tree
         :param arg: a boolean argument to write to the file as 0 or 1
@@ -533,7 +575,8 @@ class RazerDevice(DBusService):
 
         return arg
 
-    def _write_int(self, filename, arg):
+    @cachable_input_value(attr='cached_values')
+    def _write_int(self, filename, arg, use_cache=False):
         """
         :param filename: a driver file in the sysfs tree
         :param arg: an integer argument to write to the file
@@ -544,7 +587,8 @@ class RazerDevice(DBusService):
 
         return arg
 
-    def _write_percent(self, filename, arg, maxval=None):
+    @cachable_input_value(attr='cached_values')
+    def _write_percent(self, filename, arg, maxval=None, use_cache=False):
         """
         :param filename: a driver file in the sysfs tree
         :param arg: a value between 0 and 100
@@ -562,7 +606,8 @@ class RazerDevice(DBusService):
 
         return arg
 
-    def _write_string(self, filename, arg):
+    @cachable_input_value(attr='cached_values')
+    def _write_string(self, filename, arg, use_cache=False):
         """
         :param filename: a driver file in the sysfs tree
         :param arg: a string argument to write to the file
@@ -570,7 +615,8 @@ class RazerDevice(DBusService):
         with open(self.get_driver_path(filename), 'w') as f:
             f.write(arg)
 
-    def _write_bytes(self, filename, arg):
+    @cachable_input_value(attr='cached_values')
+    def _write_bytes(self, filename, arg, use_cache=False):
         """
         :param filename: a driver file in the sysfs tree
         :param arg: a list of bytes to write to the file

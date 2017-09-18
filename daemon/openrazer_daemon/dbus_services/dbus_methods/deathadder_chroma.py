@@ -76,7 +76,7 @@ def get_logo_brightness(self):
     """
     self.logger.debug("DBus call get_logo_brightness")
 
-    return self._read_percent('logo_led_brightness', maxval=255)
+    return self._read_percent('logo_led_brightness', maxval=255, use_cache=True)
 
 @endpoint('razer.device.lighting.logo', 'setLogoBrightness', in_sig='d')
 def set_logo_brightness(self, brightness):
@@ -88,8 +88,7 @@ def set_logo_brightness(self, brightness):
     """
     self.logger.debug("DBus call set_logo_brightness")
 
-    self.cached_values['brightness'] = brightness
-    brightness = self._write_percent('logo_led_brightness', brightness, maxval=255)
+    brightness = self._write_percent('logo_led_brightness', brightness, maxval=255, use_cache=True)
 
     # Notify others
     self.send_effect_event('setBrightness', brightness)
@@ -246,8 +245,7 @@ def set_scroll_brightness(self, brightness):
     """
     self.logger.debug("DBus call set_scroll_brightness")
 
-    self.cached_values['brightness'] = brightness
-    brightness = self._write_percent('scroll_led_brightness', brightness, maxval=255)
+    brightness = self._write_percent('scroll_led_brightness', brightness, maxval=255, use_cache=True)
 
     # Notify others
     self.send_effect_event('setBrightness', brightness)

@@ -15,8 +15,7 @@ def get_brightness(self):
     """
     self.logger.debug("DBus call get_brightness")
 
-    brightness = self._read_percent('matrix_brightness', maxval=255)
-    self.cached_values['brightness'] = brightness
+    brightness = self._read_percent('matrix_brightness', maxval=255, use_cache=True)
 
     return brightness
 
@@ -31,8 +30,7 @@ def set_brightness(self, brightness):
     """
     self.logger.debug("DBus call set_brightness")
 
-    self.cached_values['brightness'] = brightness
-    brightness = self._write_percent('matrix_brightness', brightness, maxval=255)
+    brightness = self._write_percent('matrix_brightness', brightness, maxval=255, use_cache=True)
 
     # Notify others
     self.send_effect_event('setBrightness', brightness)
