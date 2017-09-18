@@ -80,3 +80,127 @@ class DeviceTest(unittest.TestCase):
         self.assertEqual(parent_object.notify_msg, msg)
         self.assertEqual(parent_object.notify_device, device_object)
 
+class DeviceCollectionTest(unittest.TestCase):
+    def setUp(self):
+        self.device_collection = openrazer_daemon.device.DeviceCollection()
+
+    def test_add(self):
+        dbus_object = DummyDBusObject()
+
+        self.device_collection.add(DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
+
+        self.assertIn(DEVICE1_ID, self.device_collection._id_map)
+        self.assertIn(DEVICE1_SERIAL, self.device_collection._serial_map)
+
+        device_obj_from_id = self.device_collection._id_map[DEVICE1_ID]
+        device_obj_from_serial = self.device_collection._serial_map[DEVICE1_SERIAL]
+
+        self.assertIs(device_obj_from_id, device_obj_from_serial)
+
+    def test_get(self):
+        dbus_object = DummyDBusObject()
+
+        self.device_collection.add(DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
+
+        device_obj_by_id = self.device_collection[DEVICE1_ID]
+        device_obj_by_serial = self.device_collection[DEVICE1_SERIAL]
+
+        self.assertIs(device_obj_by_id, device_obj_by_serial)
+
+    def test_invalid_get(self):
+        try:
+            device = self.device_collection.get('INVALID')
+        except IndexError:
+            pass
+
+    def test_contains(self):
+        dbus_object = DummyDBusObject()
+
+        self.device_collection.add(DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
+
+        self.assertIn(DEVICE1_ID, self.device_collection)
+        self.assertIn(DEVICE1_SERIAL, self.device_collection)
+
+    def test_remove(self):
+        dbus_object = DummyDBusObject()
+
+        self.device_collection.add(DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
+        self.assertIn(DEVICE1_ID, self.device_collection)
+
+        self.device_collection.remove(DEVICE1_ID)
+        self.assertNotIn(DEVICE1_ID, self.device_collection)
+
+        self.device_collection.add(DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
+        self.assertIn(DEVICE1_ID, self.device_collection)
+
+        self.device_collection.remove(DEVICE1_SERIAL)
+        self.assertNotIn(DEVICE1_SERIAL, self.device_collection)
+
+    def test_items(self):
+        dbus_object = DummyDBusObject()
+
+        self.device_collection.add(DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
+
+        device_id, device_obj1 = list(self.device_collection.id_items())[0]
+        device_serial, device_obj2 = list(self.device_collection.serial_items())[0]
+
+        self.assertEqual(device_id, DEVICE1_ID)
+        self.assertEqual(device_serial, DEVICE1_SERIAL)
+        self.assertIs(device_obj1, device_obj2)
+
+    def test_iter(self):
+        dbus_object = DummyDBusObject()
+
+        self.device_collection.add(DEVICE1_ID, DEVICE1_SERIAL, dbus_object)
+
+        devices = [self.device_collection.get(DEVICE1_ID)]
+
+        for device in self.device_collection:
+            devices.remove(device)
+
+        self.assertEqual(len(devices), 0)
+
+    def test_serials(self):
+        dbus_object1 = DummyDBusObject()
+        dbus_object2 = DummyDBusObject()
+
+        self.device_collection.add(DEVICE1_ID, DEVICE1_SERIAL, dbus_object1)
+        self.device_collection.add(DEVICE2_ID, DEVICE2_SERIAL, dbus_object2)
+
+        serials = self.device_collection.serials()
+
+        self.assertIn(DEVICE1_SERIAL, serials)
+        self.assertIn(DEVICE2_SERIAL, serials)
+
+    def test_devices(self):
+        dbus_object1 = DummyDBusObject()
+        dbus_object2 = DummyDBusObject()
+
+        self.device_collection.add(DEVICE1_ID, DEVICE1_SERIAL, dbus_object1)
+        self.device_collection.add(DEVICE2_ID, DEVICE2_SERIAL, dbus_object2)
+
+        device_list = self.device_collection.devices
+        available_dbus = [dbus_object1, dbus_object2]
+
+        for device in device_list:
+            available_dbus.remove(device.dbus)
+
+        # Ensure both dbus objects have been seen
+        self.assertEqual(len(available_dbus), 0)
+
+    def test_cross_device_notify(self):
+        dbus_object1 = DummyDBusObject()
+        dbus_object2 = DummyDBusObject()
+        msg = ('test', 1)
+
+        self.device_collection.add(DEVICE1_ID, DEVICE1_SERIAL, dbus_object1)
+        self.device_collection.add(DEVICE2_ID, DEVICE2_SERIAL, dbus_object2)
+
+        self.assertIs(dbus_object1.notify_msg, None)
+        self.assertIs(dbus_object2.notify_msg, None)
+
+        dbus_object1.notify_parent(msg)
+
+        # Ensure message gets sent to other devices and not itself
+        self.assertIs(dbus_object1.notify_msg, None)
+        self.assertIs(dbus_object2.notify_msg, msg)
