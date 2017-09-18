@@ -106,14 +106,14 @@ class RazerDaemon(DBusService):
         # Listen for input events from udev
         self._init_udev_monitor()
 
-        # Load Classes
-        self._device_classes = openrazer_daemon.hardware.get_device_classes()
-
         self.logger.info("Initialising Daemon (v%s). Pid: %d", __version__, os.getpid())
+
         self._init_screensaver_monitor()
 
+        # Load Classes
+        self._load_device_classes()
         self._razer_devices = DeviceCollection()
-        self._load_devices(first_run=True)
+        self._load_devices()
 
         # TODO remove
         self.syncEffects(self._config.getboolean('Startup', 'sync_effects_enabled'))
@@ -342,21 +342,21 @@ class RazerDaemon(DBusService):
 
         return result
 
-    def _load_devices(self, first_run=False):
+    def _load_device_classes(self):
+        self._device_classes = openrazer_daemon.hardware.get_device_classes()
+        max_name_len = max([len(cls.__name__) for cls in self._device_classes]) + 2
+        for cls in self._device_classes:
+            format_str = 'Loaded device specification: {0:-<' + str(max_name_len) + '} ({1:04x}:{2:04X})'
+
+            self.logger.debug(format_str.format(cls.__name__ + ' ', cls.USB_VID, cls.USB_PID))
+
+    def _load_devices(self):
         """
         Go through supported devices and load them
 
         Loops through the available hardware classes, loops through
         each device in the system and adds it if needs be.
         """
-        if first_run:
-            # Just some pretty output
-            max_name_len = max([len(cls.__name__) for cls in self._device_classes]) + 2
-            for cls in self._device_classes:
-                format_str = 'Loaded device specification: {0:-<' + str(max_name_len) + '} ({1:04x}:{2:04X})'
-
-                self.logger.debug(format_str.format(cls.__name__ + ' ', cls.USB_VID, cls.USB_PID))
-
         if self._test_dir is not None:
             device_list = os.listdir(self._test_dir)
             test_mode = True
