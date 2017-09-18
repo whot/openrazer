@@ -366,19 +366,18 @@ class RazerDaemon(DBusService):
 
         device_number = 0
         for device in device_list:
+            # Interoperability between generic list of 0000:0000:0000.0000 and pyudev
+            if test_mode:
+                sys_name = device
+                sys_path = os.path.join(self._test_dir, device)
+            else:
+                sys_name = device.sys_name
+                sys_path = device.sys_path
+
+            if sys_name in self._razer_devices:
+                continue
 
             for device_class in self._device_classes:
-                # Interoperability between generic list of 0000:0000:0000.0000 and pyudev
-                if test_mode:
-                    sys_name = device
-                    sys_path = os.path.join(self._test_dir, device)
-                else:
-                    sys_name = device.sys_name
-                    sys_path = device.sys_path
-
-                if sys_name in self._razer_devices:
-                    continue
-
                 if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
                     self.logger.info('Found device.%d: %s', device_number, sys_name)
 
@@ -426,13 +425,14 @@ class RazerDaemon(DBusService):
         :param device: Udev Device
         :type device: pyudev.device._device.Device
         """
+        sys_name = device.sys_name
+        sys_path = device.sys_path
+
+        if sys_name in self._razer_devices:
+            return
+
         device_number = len(self._razer_devices)
         for device_class in self._device_classes:
-            sys_name = device.sys_name
-            sys_path = device.sys_path
-
-            if sys_name in self._razer_devices:
-                continue
 
             if device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
                 self.logger.info('Found valid device.%d: %s', device_number, sys_name)
