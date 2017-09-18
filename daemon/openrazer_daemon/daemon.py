@@ -426,6 +426,7 @@ class RazerDaemon(DBusService):
                 continue
 
             self._razer_devices.add(sys_name, device_serial, razer_device)
+            break
 
     def _remove_device(self, device):
         """
