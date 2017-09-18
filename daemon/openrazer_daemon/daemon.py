@@ -49,6 +49,7 @@ class RazerDaemon(DBusService):
     def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, test_dir=None, bustype='session'):
 
         self._initialized = False
+        self._version = __version__
 
         setproctitle.setproctitle('openrazer-daemon')
 
@@ -281,6 +282,24 @@ class RazerDaemon(DBusService):
         result = {cls.__name__: (cls.USB_VID, cls.USB_PID) for cls in self._device_classes}
 
         return json.dumps(result)
+
+    @dbus.service.method(dbus.PROPERTIES_IFACE,
+                         in_signature='ss',
+                         out_signature='v')
+    def Get(self, interface_name, property_name):
+        return self.GetAll(interface_name)[property_name]
+
+    @dbus.service.method(dbus.PROPERTIES_IFACE,
+                         in_signature='s',
+                         out_signature='a{sv}')
+    def GetAll(self, interface_name):
+        if interface_name != 'razer.daemon':
+            raise dbus.exceptions.DBusException(
+                    'com.example.UnknownInterface',
+                    'The RazerDaemon object does not implement the {} interface'.format(interface_name))
+
+        return { 'version': self._version }
+                    
 
     @dbus.service.method('razer.daemon', out_signature='s')
     def version(self):
