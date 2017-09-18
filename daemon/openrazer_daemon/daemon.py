@@ -115,25 +115,8 @@ class RazerDaemon(DBusService):
         self._razer_devices = DeviceCollection()
         self._load_devices(first_run=True)
 
-        # Add DBus methods
-        methods = {
-            # interface, method, callback, in-args, out-args
-            ('razer.devices', 'getDevices', self.get_serial_list, None, 'as'),
-            ('razer.devices', 'supportedDevices', self.supported_devices, None, 's'),
-            ('razer.devices', 'enableTurnOffOnScreensaver', self.enable_turn_off_on_screensaver, 'b', None),
-            ('razer.devices', 'getOffOnScreensaver', self.get_off_on_screensaver, None, 'b'),
-            ('razer.devices', 'syncEffects', self.sync_effects, 'b', None),
-            ('razer.devices', 'getSyncEffects', self.get_sync_effects, None, 'b'),
-            ('razer.daemon', 'version', self.version, None, 's'),
-            ('razer.daemon', 'stop', self.stop, None, None),
-        }
-
-        for m in methods:
-            self.logger.debug("Adding {}.{} method to DBus".format(m[0], m[1]))
-            self.add_dbus_method(m[0], m[1], m[2], in_signature=m[3], out_signature=m[4])
-
         # TODO remove
-        self.sync_effects(self._config.getboolean('Startup', 'sync_effects_enabled'))
+        self.syncEffects(self._config.getboolean('Startup', 'sync_effects_enabled'))
         # TODO ======
 
         self._initialized = True
@@ -276,7 +259,8 @@ class RazerDaemon(DBusService):
         if config_file is not None and os.path.exists(config_file):
             self._config.read(config_file)
 
-    def get_off_on_screensaver(self):
+    @dbus.service.method('razer.devices', out_signature='b')
+    def getOffOnScreensaver(self):
         """
         Returns if turn off on screensaver
 
@@ -285,17 +269,20 @@ class RazerDaemon(DBusService):
         """
         return self._screensaver_monitor.monitoring
 
-    def enable_turn_off_on_screensaver(self, enable):
+    @dbus.service.method('razer.devices', in_signature='b')
+    def enableTurnOffOnScreensaver(self, enable):
         """
         Enable the turning off of devices when the screensaver is active
         """
         self._screensaver_monitor.monitoring = enable
 
-    def supported_devices(self):
+    @dbus.service.method('razer.devices', out_signature='s')
+    def supportedDevices(self):
         result = {cls.__name__: (cls.USB_VID, cls.USB_PID) for cls in self._device_classes}
 
         return json.dumps(result)
 
+    @dbus.service.method('razer.daemon', out_signature='s')
     def version(self):
         """
         Get the daemon version
@@ -319,15 +306,17 @@ class RazerDaemon(DBusService):
         for device in self._razer_devices:
             device.dbus.resume_device()
 
-    def get_serial_list(self):
+    @dbus.service.method('razer.devices', out_signature='as')
+    def getDevices(self):
         """
         Get list of devices serials
         """
         serial_list = self._razer_devices.serials()
-        self.logger.debug('DBus called get_serial_list')
+        self.logger.debug('DBus called getDevices')
         return serial_list
 
-    def sync_effects(self, enabled):
+    @dbus.service.method('razer.devices', in_signature='b')
+    def syncEffects(self, enabled):
         """
         Sync the effects across the devices
 
@@ -338,7 +327,8 @@ class RazerDaemon(DBusService):
         for device in self._razer_devices.devices:
             device.dbus.effect_sync = enabled
 
-    def get_sync_effects(self):
+    @dbus.service.method('razer.devices', out_signature='b')
+    def getSyncEffects(self):
         """
         Sync the effects across the devices
 
@@ -516,6 +506,7 @@ class RazerDaemon(DBusService):
         except KeyboardInterrupt:
             self.logger.debug('Shutting down')
 
+    @dbus.service.method('razer.daemon')
     def stop(self):
         """
         Wrapper for quit
