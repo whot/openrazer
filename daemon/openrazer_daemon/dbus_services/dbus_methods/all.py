@@ -15,20 +15,11 @@ def version(self):
     """
     self.logger.debug("DBus call version")
 
-    #Caching
-    if 'driver_version' in self.cached_values:
-        return self.cached_values['driver_version']
+    try:
+        version = self._read_string('version', use_cache=True)
+    except FileNotFoundError:
+        version = '0.0.0'
 
-    driver_path = self.get_driver_path('version')
-
-    driver_version = '0.0.0'
-
-    if os.path.exists(driver_path):
-        # Check it exists, as people might not have reloaded driver
-        with open(driver_path, 'r') as driver_file:
-            driver_version = driver_file.read().strip()
-
-    self.cached_values['driver_version'] = driver_version
     return driver_version
 
 
