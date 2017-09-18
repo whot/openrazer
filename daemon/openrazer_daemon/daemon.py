@@ -28,7 +28,7 @@ import json
 
 import openrazer_daemon.hardware
 from openrazer_daemon.dbus_services.service import DBusService
-from openrazer_daemon.device import DeviceCollection
+from openrazer_daemon.device import Device
 from openrazer_daemon.misc.screensaver_monitor import ScreensaverMonitor
 
 class RazerDaemon(DBusService):
@@ -112,7 +112,7 @@ class RazerDaemon(DBusService):
 
         # Load Classes
         self._load_device_classes()
-        self._razer_devices = DeviceCollection()
+        self._razer_devices = []
         self._load_devices()
 
         # TODO remove
@@ -311,7 +311,7 @@ class RazerDaemon(DBusService):
         """
         Get list of devices serials
         """
-        serial_list = self._razer_devices.serials()
+        serial_list = [d.device_id for d in self._razer_devices]
         self.logger.debug('DBus called getDevices')
         return serial_list
 
@@ -324,7 +324,7 @@ class RazerDaemon(DBusService):
         :type enabled: bool
         """
         # Todo perhaps move logic to device collection
-        for device in self._razer_devices.devices:
+        for device in self._razer_devices:
             device.dbus.effect_sync = enabled
 
     @dbus.service.method('razer.devices', out_signature='b')
@@ -337,7 +337,7 @@ class RazerDaemon(DBusService):
         """
         result = False
 
-        for device in self._razer_devices.devices:
+        for device in self._razer_devices:
             result |= device.dbus.effect_sync
 
         return result
@@ -383,7 +383,7 @@ class RazerDaemon(DBusService):
             sys_name = device.sys_name
             sys_path = device.sys_path
 
-        if sys_name in self._razer_devices:
+        if sys_name in [ d.device_id for d in self._razer_devices]:
             return
 
         # TODO add testdir support
@@ -422,7 +422,7 @@ class RazerDaemon(DBusService):
                 logging.warning("Could not get serial for device {0}. Skipping".format(sys_name))
                 continue
 
-            self._razer_devices.add(sys_name, device_serial, razer_device)
+            self._razer_devices.append(Device(sys_name, device_serial, razer_device))
             break
 
     def _remove_device(self, device):
@@ -435,14 +435,14 @@ class RazerDaemon(DBusService):
         device_id = device.sys_name
 
         try:
-            device = self._razer_devices[device_id]
+            device = [d for d in self._razer_devices if d.device_id == device_id][0]
 
             device.dbus.close()
             device.dbus.remove_from_connection()
             self.logger.warning("Removing %s", device_id)
 
             # Delete device
-            del self._razer_devices[device.device_id]
+            self._razer_devices.remove(device)
             self.device_removed()
 
         except IndexError:  # Why didnt i set it up as KeyError
