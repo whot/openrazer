@@ -394,11 +394,8 @@ class RazerDaemon(DBusService):
 
                 # Checking permissions
                 test_file = os.path.join(sys_path, 'device_type')
-                file_group_id = os.stat(test_file).st_gid
-                file_group_name = grp.getgrgid(file_group_id)[0]
-
-                if os.getgid() != file_group_id and file_group_name != 'plugdev':
-                    self.logger.critical("Could not access {0}/device_type, file is not owned by plugdev".format(sys_path))
+                if not os.access(test_file, os.R_OK):
+                    self.logger.critical("Could not access {0}/device_type".format(sys_path))
                     break
 
                 razer_device = device_class(sys_path, device_number, self._config, testing=self._test_dir is not None, additional_interfaces=sorted(additional_interfaces))
