@@ -15,6 +15,36 @@ from openrazer_daemon.dbus_services.service import DBusService
 import openrazer_daemon.dbus_services.dbus_methods
 from openrazer_daemon.misc import effect_sync
 
+def cachable_return_value(attr="cache_attribute_not_set"):
+    """
+    A decorator for functions returning a cachable value. The first time
+    the function is invoked, this decorator calls through to the actual
+    function. Any return value is stored in self.attr, where self is the
+    first argument to the function. Future calls will return that cached
+    value.
+
+    Caching only happens with the keywoard argument use_cache=True
+    """
+    def cachable_decorator(func):
+        def func_wrapper(*args, **kwargs):
+            use_cache = False
+            self = args[0]
+            filename = args[1]
+            try:
+                use_cache = kwargs['use_cache']
+                if use_cache:
+                    cache = getattr(self, attr)
+                    return cache[filename]
+            except KeyError:
+                pass
+
+            val = func(*args, **kwargs)
+            if val is not None and use_cache:
+                self.cached_values[filename] = val
+            return val
+        return func_wrapper
+    return cachable_decorator
+
 
 # pylint: disable=too-many-instance-attributes
 class RazerDevice(DBusService):
@@ -428,19 +458,26 @@ class RazerDevice(DBusService):
     def __repr__(self):
         return "{0}:{1}".format(self.__class__.__name__, self.serial)
 
-
-    def _read_10(self, filename):
+    @cachable_return_value(attr='cached_values')
+    def _read_10(self, filename, use_cache=False):
         """
         :param filename: a driver file in the sysfs tree
         :return: 1 or 0 depending on the file's content
         """
+        if use_cached:
+            try:
+                return self._cached_values[filename]
+            except KeyError:
+                pass
+
         with open(self.get_driver_path(filename)) as f:
             b = f.read().strip()
             if b != '0' and b != '1':
                 self.logger.error("Bug: expected bool but got {} in {}".format(b, filename))
             return int(b) == 1
 
-    def _read_int(self, filename, base=10):
+    @cachable_return_value(attr='cached_values')
+    def _read_int(self, filename, base=10, use_cache=False):
         """
         :param filename: a driver file in the sysfs tree
         :return: the integer value of the file
@@ -449,7 +486,8 @@ class RazerDevice(DBusService):
             i = f.read().strip()
             return int(i, base)
 
-    def _read_percent(self, filename, maxval=None):
+    @cachable_return_value(attr='cached_values')
+    def _read_percent(self, filename, maxval=None, use_cache=False):
         """
         :param filename: a driver file in the sysfs tree
         :param maxval: if set, the returned value is normalized for the range
@@ -465,7 +503,8 @@ class RazerDevice(DBusService):
 
             return round(d, 2)
 
-    def _read_bytes(self, filename):
+    @cachable_return_value(attr='cached_values')
+    def _read_bytes(self, filename, use_cache=False):
         """
         :param filename: a driver file in the sysfs tree
         :return: an array of bytes
@@ -474,7 +513,8 @@ class RazerDevice(DBusService):
         with open(self.get_driver_path(filename), 'rb') as f:
             return f.read()
 
-    def _read_string(self, filename):
+    @cachable_return_value(attr='cached_values')
+    def _read_string(self, filename, use_cache=False):
         """
         :param filename: a driver file in the sysfs tree
         :return: the string content of the file, stripped of linebreaks

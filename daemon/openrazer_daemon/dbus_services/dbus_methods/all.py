@@ -42,7 +42,7 @@ def get_firmware(self):
     """
     self.logger.debug("DBus call get_firmware")
 
-    return self._read_string('firmware_version')
+    return self._read_string('firmware_version', use_cache=True)
 
 
 @endpoint('razer.device.misc', 'getDeviceName', out_sig='s')
@@ -55,7 +55,7 @@ def get_device_name(self):
     """
     self.logger.debug("DBus call get_device_name")
 
-    return self._read_string('device_type')
+    return self._read_string('device_type', use_cache=True)
 
 
 # Functions to define a hardware class
