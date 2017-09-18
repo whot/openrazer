@@ -430,6 +430,13 @@ class RazerDaemon(DBusService):
         if sys_name in self._razer_devices:
             return
 
+        # Basically find the other usb interfaces
+        device_match = sys_name.split('.')[0]
+        for d in self._razer_devices:
+            if device_match in d.device_id and d.device_id != sys_name:
+                d.dbus.additional_interfaces.append(sys_path)
+                return
+
         device_number = len(self._razer_devices)
         for device_class in self._device_classes:
             if not device_class.match(sys_name, sys_path):  # Check it matches sys/ ID format and has device_type file
